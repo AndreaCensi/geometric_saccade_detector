@@ -227,7 +227,7 @@ def write_saccade_info_table(f, saccades, t0, t1):
         f.write(' <td>%d</td>\n' % saccades[i]['sign'])
         f.write(' <td>%f</td>\n' % saccades[i]['linear_velocity_modulus'])
         f.write(' <td>%f</td>\n' % saccades[i]['linear_acceleration_modulus'])
-        f.write(' <td>%f</td>\n' % saccades[i]['velocity'])
+        f.write(' <td>%f</td>\n' % saccades[i]['top_velocity'])
         f.write(' <td>%d, %d</td>\n' % (saccades[i]['orientation_start'],
                                     saccades[i]['orientation_stop']))
         f.write(' <td>%d,%d</td>\n' % (

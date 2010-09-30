@@ -1,12 +1,15 @@
 #!/usr/bin/env python
-import pickle, os, scipy.io, numpy, sys
+import pickle, os, scipy.io, numpy, sys, platform
+from datetime import datetime
 from optparse import OptionParser 
 
-from geometric_saccade_detector import logger
+from geometric_saccade_detector import logger, version
 from geometric_saccade_detector.debug_output import write_debug_output
 from geometric_saccade_detector.flydra_db_utils import get_good_smoothed_tracks, \
-    get_good_files
+    get_good_files, timestamp_string_from_filename
 from geometric_saccade_detector.algorithm import geometric_saccade_detect
+from geometric_saccade_detector.filesystem_utils import get_user
+import tables
 
 
 def main():
@@ -39,16 +42,24 @@ def main():
                       help="Inner interval")
     parser.add_option("--deltaT_outer_sec", default=10 * dt, type='float',
                       help="Outer interval")
-    parser.add_option("--min_amplitude_deg", default=15, type='float',
+    parser.add_option("--min_amplitude_deg", default=25, type='float',
                       help="Minimum saccade amplitude (deg)")
-    parser.add_option("--min_linear_velocity", default=0.05, type='float',
+    parser.add_option("--min_linear_velocity", default=0.1, type='float',
                       help="Minimum linear velocity when saccading (m/s)")
+    parser.add_option("--max_linear_acceleration", default=20, type='float',
+                      help="Maximum linear acceleration when saccading (m/s^2)")
     parser.add_option("--max_orientation_dispersion_deg", default=15, type='float',
                       help="Maximum dispersion (deg)")
     parser.add_option("--minimum_interval_sec", default=10 * dt, type='float',
                       help="Minimum interval between saccades.")
     
     (options, args) = parser.parse_args()
+    
+    # Create processed string
+    processed = 'geometric_saccade_detector %s %s %s@%s Python %s' % \
+                (version, datetime.now().strftime("%Y%m%d_%H%M%S"),
+                 get_user(), platform.node(), platform.python_version())
+        
 
     if not os.path.exists(options.output_dir):
         os.makedirs(options.output_dir)
@@ -67,11 +78,14 @@ def main():
     
         basename = os.path.splitext(os.path.basename(filename))[0]
         
-        output_saccades_mat = os.path.join(options.output_dir,
-                                           basename + '-saccades.mat')        
-        output_saccades_pickle = os.path.join(options.output_dir,
-                                              basename + '-saccades.pickle')
-        if os.path.exists(output_saccades_mat):
+        output_saccades_mat = \
+            os.path.join(options.output_dir, basename + '-saccades.mat')        
+        output_saccades_hdf = \
+            os.path.join(options.output_dir, basename + '-saccades.h5')        
+        output_saccades_pickle = \
+            os.path.join(options.output_dir, basename + '-saccades.pickle')
+            
+        if os.path.exists(output_saccades_hdf):
             logger.info('File %s exists; skipping.' % output_saccades_mat)
             continue
         
@@ -100,11 +114,22 @@ def main():
           'min_amplitude_deg':  options.min_amplitude_deg   ,
           'max_orientation_dispersion_deg': options.max_orientation_dispersion_deg   ,
           'minimum_interval_sec':  options.minimum_interval_sec,
+          'max_linear_acceleration':  options.max_linear_acceleration,
           'min_linear_velocity': options.min_linear_velocity
         }
         saccades, annotated_data = geometric_saccade_detect(all_data, params)
 
         
+        # other fields used for managing different samples, used in the analysis
+        saccades['species'] = 'Dmelanogaster'
+        saccades['stimulus'] = 'stim_fname'
+        sample_name = timestamp_string_from_filename(filename)
+        saccades['sample'] = sample_name
+        saccades['sample_num'] = -1 # will be filled in by someone else
+        saccades['processed'] = processed
+        ('processed', 'S255'), # timestamp and processing host
+    
+    
         # Write matlab output
         
         logger.info("Writing to %s" % output_saccades_mat)
@@ -113,8 +138,16 @@ def main():
     
         # Write pickle output
         logger.info("Writing to %s" % output_saccades_pickle)
-        pickle.dump(saccades, open(output_saccades_pickle, 'wb'))
+        pickle.dump({'saccades':saccades}, open(output_saccades_pickle, 'wb'))
     
+        
+        # Write h5 output
+        logger.info("Writing to %s" % output_saccades_hdf)
+        h5file = tables.openFile(output_saccades_hdf, mode="w")
+        h5file.createTable('/', 'saccades', saccades,
+                    title="Detected saccades for sample %s" % sample_name)
+        h5file.close()
+        
         # Write debug figures
         if options.debug_output:
             debug_output_dir = os.path.join(options.output_dir, basename)
@@ -129,9 +162,5 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
 
 

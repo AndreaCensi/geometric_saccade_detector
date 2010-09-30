@@ -17,7 +17,8 @@ def geometric_saccade_detect(rows, params):
           'min_amplitude_deg',
           'max_orientation_dispersion_deg',
           'min_linear_velocity',
-          'minimum_interval_sec'.
+          'minimum_interval_sec',
+          'max_linear_acceleration'.
         
         Returns a tuple of two numpy arrays. 
         The first is the saccade array (using saccade_dtype),
@@ -80,12 +81,14 @@ def geometric_saccade_detect(rows, params):
     annotations = numpy.ndarray(dtype=annotation_dtype, shape=rows.shape)
     
     # Get parameters for detection
+    
     deltaT_inner_sec = params['deltaT_inner_sec']
     min_amplitude_deg = params['min_amplitude_deg']
     max_orientation_dispersion_deg = params['max_orientation_dispersion_deg']
     deltaT_outer_sec = params['deltaT_outer_sec']
     minimum_interval_sec = params['minimum_interval_sec']
     min_linear_velocity = params['min_linear_velocity']
+    max_linear_acceleration = params['max_linear_acceleration']
     
     assert deltaT_inner_sec < deltaT_outer_sec
     
@@ -96,8 +99,7 @@ def geometric_saccade_detect(rows, params):
     yacc = compute_derivative(rows['yvel'], timestamp)
     
     annotations['linear_acceleration_modulus'] = numpy.sqrt(xacc ** 2 + yacc ** 2)
-    
-    annotations['preference'] = -1000
+     
         
     for i in range(len(rows)):
         
@@ -120,25 +122,16 @@ def geometric_saccade_detect(rows, params):
         
         if len(before) < 2 or len(after) < 2:
             annotations['considered'][i] = 0
-            annotations['candidate'][i] = 0
-            annotations['before_orientation'][i] = numpy.NaN
-            annotations['before_dispersion'][i] = numpy.NaN
-            annotations['after_orientation'][i] = numpy.NaN
-            annotations['after_dispersion'][i] = numpy. NaN
-            annotations['turning_angle'][i] = numpy.NaN
-            annotations['amplitude'][i] = numpy.NaN 
-            # annotations['preference'][i] = numpy.NaN
-            annotations['sign'][i] = 0
-
+            annotations['candidate'][i] = 0 
             continue
 
         # these are orientation and dispersion of each branch
         before_orientation_inverted, before_dispersion = \
             get_orientation_and_dispersion(rows, center=i, indices=before)
             
-        before_orientation = before_orientation_inverted + numpy.pi
+        orientation_start = before_orientation_inverted + numpy.pi
  
-        after_orientation, after_dispersion = \
+        orientation_stop, after_dispersion = \
             get_orientation_and_dispersion(rows, center=i, indices=after)
         
         #dummy, dummy, before_orientation = line_fit(rows['x'][before], rows['y'][before])
@@ -147,21 +140,23 @@ def geometric_saccade_detect(rows, params):
         
         # the net angle is estimated as  before_orientation - after_orientation
         
-        turning_angle = normalize_pi(before_orientation - after_orientation) 
+        turning_angle = normalize_pi(orientation_start - orientation_stop) 
         amplitude = abs(turning_angle)
         
         candidate = \
             (before_dispersion <= numpy.radians(max_orientation_dispersion_deg)) and \
             (after_dispersion <= numpy.radians(max_orientation_dispersion_deg)) and \
             (amplitude >= numpy.radians(min_amplitude_deg)) and \
-            (annotations['linear_velocity_modulus'][i] >= min_linear_velocity) 
+            (annotations['linear_velocity_modulus'][i] >= min_linear_velocity) and \
+            (annotations['linear_acceleration_modulus'][i] <= max_linear_acceleration)
+
         preference = amplitude - 0.5 * before_dispersion - 0.5 * after_dispersion
-	assert numpy.isfinite(preference)    
+
     
         annotations['considered'][i] = 1
-        annotations['before_orientation'][i] = before_orientation
+        annotations['orientation_start'][i] = orientation_start
+        annotations['orientation_stop'][i] = orientation_stop
         annotations['before_dispersion'][i] = before_dispersion
-        annotations['after_orientation'][i] = after_orientation
         annotations['after_dispersion'][i] = after_dispersion
         annotations['turning_angle'][i] = turning_angle
         annotations['amplitude'][i] = amplitude 
@@ -173,15 +168,18 @@ def geometric_saccade_detect(rows, params):
         annotations['candidate'][i] = candidate
             
     
-    # while looking for saccades, mark as used 
-    annotations['marked_as_used'] = 0
-    
     preferences = annotations['preference']
+    for i in range(len(rows)):
+        if not annotations['considered'][i] or not annotations['candidate'][i]:
+            preferences[i] = -100
+            
     ordered_indices = numpy.argsort(-preferences)
     # make sure we are sorting from big to small
     assert preferences[ordered_indices[0]] >= preferences[ordered_indices[-1]]
     
     saccades = []
+    # while looking for saccades, mark as used 
+    annotations['marked_as_used'] = 0
     
     # visit each point in order of preference 
     for i in ordered_indices:
@@ -196,8 +194,7 @@ def geometric_saccade_detect(rows, params):
         
         # ok, let's mark this point as a saccade 
         saccade = numpy.ndarray(dtype=saccade_dtype, shape=())
-        saccade['velocity'] = numpy.NaN
-
+        saccade['top_velocity'] = numpy.NaN
         saccade['time_start'] = timestamp[i] - deltaT_outer_sec
         saccade['time_middle'] = timestamp[i]
         saccade['linear_velocity_modulus'] = \
@@ -207,8 +204,8 @@ def geometric_saccade_detect(rows, params):
         saccade['time_stop'] = timestamp[i] + deltaT_outer_sec
         saccade['amplitude'] = numpy.degrees(annotations['amplitude'][i])
         saccade['sign'] = annotations['sign'][i]
-        saccade['orientation_start'] = numpy.degrees(annotations['before_orientation'][i])
-        saccade['orientation_stop'] = numpy.degrees(annotations['after_orientation'][i])
+        saccade['orientation_start'] = numpy.degrees(annotations['orientation_start'][i])
+        saccade['orientation_stop'] = numpy.degrees(annotations['orientation_stop'][i])
         saccade['num_samples_used_after'] = annotations['num_samples_used_after'][i]
         saccade['num_samples_used_before'] = annotations['num_samples_used_before'][i]
 
@@ -232,7 +229,8 @@ def geometric_saccade_detect(rows, params):
     for i in range(1, len(saccades)):
         saccades[i]['time_passed'] = \
             saccades[i]['time_start'] - saccades[i - 1]['time_start'];  
-        #assert   saccades['time_passed'][i] > 0
+        assert   saccades[i]['time_passed'] > 0
+        
     # remove first saccade (cannot compute time_passed)
     saccades.pop(0)
     
