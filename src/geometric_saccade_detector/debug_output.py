@@ -1,6 +1,7 @@
 import os, math, numpy
 
 from matplotlib import pylab 
+from geometric_saccade_detector.math_utils import find_closest_index
 
 def mark_saccades(rows, saccades):
     a = pylab.axis()
