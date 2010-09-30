@@ -1,6 +1,6 @@
 import numpy
-from snp.saccades import logger
-from snp.saccades.structures import saccade_dtype, annotation_dtype
+from geometric_saccade_detector import logger
+from geometric_saccade_detector.structures import saccade_dtype, annotation_dtype
 from geometric_saccade_detector.math_utils import merge_fields, \
     compute_derivative, find_indices_in_bounds, get_orientation_and_dispersion, \
     normalize_pi
@@ -97,6 +97,7 @@ def geometric_saccade_detect(rows, params):
     
     annotations['linear_acceleration_modulus'] = numpy.sqrt(xacc ** 2 + yacc ** 2)
     
+    annotations['preference'] = -1000
         
     for i in range(len(rows)):
         
@@ -126,7 +127,7 @@ def geometric_saccade_detect(rows, params):
             annotations['after_dispersion'][i] = numpy. NaN
             annotations['turning_angle'][i] = numpy.NaN
             annotations['amplitude'][i] = numpy.NaN 
-            annotations['preference'][i] = numpy.NaN
+            # annotations['preference'][i] = numpy.NaN
             annotations['sign'][i] = 0
 
             continue
@@ -155,7 +156,8 @@ def geometric_saccade_detect(rows, params):
             (amplitude >= numpy.radians(min_amplitude_deg)) and \
             (annotations['linear_velocity_modulus'][i] >= min_linear_velocity) 
         preference = amplitude - 0.5 * before_dispersion - 0.5 * after_dispersion
-        
+	assert numpy.isfinite(preference)    
+    
         annotations['considered'][i] = 1
         annotations['before_orientation'][i] = before_orientation
         annotations['before_dispersion'][i] = before_dispersion
@@ -177,7 +179,7 @@ def geometric_saccade_detect(rows, params):
     preferences = annotations['preference']
     ordered_indices = numpy.argsort(-preferences)
     # make sure we are sorting from big to small
-    assert preferences[ordered_indices[0]] > preferences[ordered_indices[-1]]
+    assert preferences[ordered_indices[0]] >= preferences[ordered_indices[-1]]
     
     saccades = []
     

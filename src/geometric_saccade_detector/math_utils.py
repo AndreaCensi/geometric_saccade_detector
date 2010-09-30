@@ -59,6 +59,9 @@ def get_orientation_and_dispersion(rows, center, indices):
     
     # compute statistics of this angle distribution
     mean, std = angle_mean_and_std(theta)
+
+    assert not numpy.isnan(mean)
+    assert not numpy.isnan(std)
     
     return mean, std
         
