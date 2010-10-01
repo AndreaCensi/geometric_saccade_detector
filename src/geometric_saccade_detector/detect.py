@@ -120,7 +120,7 @@ def main():
 
         # other fields used for managing different samples, used in the analysis
         saccades['species'] = 'Dmelanogaster'
-        saccades['stimulus'] = 'stim_fname'
+        saccades['stimulus'] = stim_fname
         sample_name = timestamp_string_from_filename(filename)
         saccades['sample'] = sample_name
         saccades['sample_num'] = -1 # will be filled in by someone else

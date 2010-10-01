@@ -208,7 +208,9 @@ def geometric_saccade_detect(rows, params):
         saccade['orientation_stop'] = numpy.degrees(annotations['orientation_stop'][i])
         saccade['num_samples_used_after'] = annotations['num_samples_used_after'][i]
         saccade['num_samples_used_before'] = annotations['num_samples_used_before'][i]
-
+        saccade['x'] = rows['x'][i]
+        saccade['y'] = rows['y'][i]
+        
         saccades.append(saccade)
         
         # mark the nearby indices as used by this saccade
@@ -229,7 +231,7 @@ def geometric_saccade_detect(rows, params):
     for i in range(1, len(saccades)):
         saccades[i]['time_passed'] = \
             saccades[i]['time_start'] - saccades[i - 1]['time_start'];  
-        assert   saccades[i]['time_passed'] > 0
+        assert saccades[i]['time_passed'] > 0
         
     # remove first saccade (cannot compute time_passed)
     saccades.pop(0)
