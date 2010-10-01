@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import pickle, os, scipy.io, numpy, sys, platform
+import pickle, os, scipy.io, numpy, sys, platform, tables
 from datetime import datetime
 from optparse import OptionParser 
 
@@ -9,7 +9,6 @@ from geometric_saccade_detector.flydra_db_utils import get_good_smoothed_tracks,
     get_good_files, timestamp_string_from_filename
 from geometric_saccade_detector.algorithm import geometric_saccade_detect
 from geometric_saccade_detector.filesystem_utils import get_user
-import tables
 
 
 def main():
@@ -119,19 +118,15 @@ def main():
         }
         saccades, annotated_data = geometric_saccade_detect(all_data, params)
 
-        
         # other fields used for managing different samples, used in the analysis
         saccades['species'] = 'Dmelanogaster'
         saccades['stimulus'] = 'stim_fname'
         sample_name = timestamp_string_from_filename(filename)
         saccades['sample'] = sample_name
         saccades['sample_num'] = -1 # will be filled in by someone else
-        saccades['processed'] = processed
-        ('processed', 'S255'), # timestamp and processing host
-    
+        saccades['processed'] = processed    
     
         # Write matlab output
-        
         logger.info("Writing to %s" % output_saccades_mat)
         scipy.io.savemat(output_saccades_mat, {'saccades':saccades},
                          oned_as='column')
@@ -140,7 +135,6 @@ def main():
         logger.info("Writing to %s" % output_saccades_pickle)
         pickle.dump({'saccades':saccades}, open(output_saccades_pickle, 'wb'))
     
-        
         # Write h5 output
         logger.info("Writing to %s" % output_saccades_hdf)
         h5file = tables.openFile(output_saccades_hdf, mode="w")

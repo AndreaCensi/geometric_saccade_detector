@@ -8,7 +8,8 @@ setup(
     install_requires=['flydra', 'matplotlib'],
     entry_points={
          'console_scripts': [
-           'geo_sac_detect  = geometric_saccade_detector.detect:main'
+           'geo_sac_detect  = geometric_saccade_detector.detect:main',
+           'geo_sac_compact  = geometric_saccade_detector.compact_data:main'
         ]
       },
       
@@ -18,7 +19,7 @@ setup(
         "from Flydra data.",
     license="GPL",
     keywords="saccade fly flies filtering drosophila flydra sachertorte",
-    url="https://github.com/AndreaCensi/geometric_saccade_detector"
+    url="http://github.com/AndreaCensi/geometric_saccade_detector"
 )
 
 
