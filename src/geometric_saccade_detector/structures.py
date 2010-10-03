@@ -20,20 +20,19 @@ saccade_dtype = [
     ('orientation_stop', 'float64'), # degrees
     ('time_passed', 'float64'),
     ('sign', 'int8'),
-    ('amplitude', 'float64'), # degrees
-    # the following are not computed meaningfully 
+    ('amplitude', 'float64'), # degrees 
     ('duration', 'float64'),
     ('top_velocity', 'float64'), # angular velocity, degrees/second
     
     # other fields used for managing different samples, used in the analysis
-    ('species', 'S255'),
-    ('stimulus', 'S255'),
-    ('sample', 'S255'), # format: 'YYYYMMDD_HHmmSS'
+    ('species', 'S32'),
+    ('stimulus', 'S32'),
+    ('sample', 'S64'), # format: 'YYYYMMDD_HHmmSS'
     ('sample_num', 'int'), # unique index for the sample
                            # This is filled in later
 
     # other debug fields, not used in the analysis
-    ('processed', 'S255'), # timestamp and processing host
+    ('processed', 'S128'), # timestamp and processing host
     
     # Specific to mamarama data
     ('time_middle', 'float64'),
@@ -59,6 +58,9 @@ annotation_dtype = [
     ('preference', 'float64'),
     ('linear_velocity_modulus', 'float64'),
     ('linear_acceleration_modulus', 'float64'),
+    ('linear_velocity_modulus_smooth', 'float64'),
+    ('linear_acceleration_modulus_smooth', 'float64'),
+    ('angular_velocity_modulus', 'float64'),
     ('amplitude', 'float64'),
     ('considered', 'uint8'),
     ('sign', 'int8'),

@@ -18,7 +18,7 @@ def main():
                       help="Output directory")
 
     parser.add_option("--min_frames_per_track", default=400,
-        help="Minimum number of frames per track [default: %default]")
+        help="Minimum number of frames per track [= %default]")
 
     parser.add_option("--confirm_problems",
                       help="Stop interactively on problems with log files'\
@@ -26,10 +26,13 @@ def main():
                       default=False, action="store_true")
 
     parser.add_option("--dynamic_model_name",
-                      help="Smoothing dynamical model [default: $default]",
+                      help="Smoothing dynamical model [default: %default]",
                       default="mamarama, units: mm")
     
-    parser.add_option("--debug_output", help="Creates debug figures",
+    parser.add_option("--debug_output", help="Creates debug figures.",
+                      default=False, action="store_true")
+
+    parser.add_option("--nocache", help="Ignores already computed results.",
                       default=False, action="store_true")
 
     parser.add_option("--smoothing", help="Uses Kalman-smoothed data.",
@@ -38,22 +41,28 @@ def main():
     # detection parameters
     dt = 1.0 / 60
     parser.add_option("--deltaT_inner_sec", default=4 * dt, type='float',
-                      help="Inner interval")
+                      help="Inner interval [= %default]")
     parser.add_option("--deltaT_outer_sec", default=10 * dt, type='float',
-                      help="Outer interval")
+                      help="Outer interval [= %default]")
     parser.add_option("--min_amplitude_deg", default=25, type='float',
-                      help="Minimum saccade amplitude (deg)")
+                      help="Minimum saccade amplitude (deg) [= %default]")
     parser.add_option("--min_linear_velocity", default=0.1, type='float',
-                      help="Minimum linear velocity when saccading (m/s)")
+                      help="Minimum linear velocity when saccading (m/s) [= %default]")
     parser.add_option("--max_linear_acceleration", default=20, type='float',
-                      help="Maximum linear acceleration when saccading (m/s^2)")
+                      help="Maximum linear acceleration when saccading (m/s^2) [= %default]")
+    parser.add_option("--max_angular_velocity", default=8000, type='float',
+                      help="Maximum angular velocity when saccading (deg/s) [= %default]")
     parser.add_option("--max_orientation_dispersion_deg", default=15, type='float',
-                      help="Maximum dispersion (deg)")
+                      help="Maximum dispersion (deg) [= %default]")
     parser.add_option("--minimum_interval_sec", default=10 * dt, type='float',
-                      help="Minimum interval between saccades.")
+                      help="Minimum interval between saccades. [= %default]")
     
     (options, args) = parser.parse_args()
     
+    if not args:
+        logger.error('No files or directories specified.')
+        sys.exit(-1)
+        
     # Create processed string
     processed = 'geometric_saccade_detector %s %s %s@%s Python %s' % \
                 (version, datetime.now().strftime("%Y%m%d_%H%M%S"),
@@ -74,7 +83,8 @@ def main():
     n = len(good_files)
     for i in range(n):
         (filename, obj_ids, stim_fname) = good_files[i]
-    
+        # only maintain basename
+        stim_fname = os.path.splitext(os.path.basename(stim_fname))[0]
         basename = os.path.splitext(os.path.basename(filename))[0]
         
         output_saccades_mat = \
@@ -84,8 +94,9 @@ def main():
         output_saccades_pickle = \
             os.path.join(options.output_dir, basename + '-saccades.pickle')
             
-        if os.path.exists(output_saccades_hdf):
-            logger.info('File %s exists; skipping.' % output_saccades_mat)
+        if os.path.exists(output_saccades_hdf) and not options.nocache:
+            logger.info('File %s exists; skipping. (use --nocache to ignore)' % \
+                             output_saccades_hdf)
             continue
         
         logger.info("File %d/%d %s %s %s " % (i, n, str(filename), str(obj_ids), stim_fname))
@@ -114,7 +125,8 @@ def main():
           'max_orientation_dispersion_deg': options.max_orientation_dispersion_deg   ,
           'minimum_interval_sec':  options.minimum_interval_sec,
           'max_linear_acceleration':  options.max_linear_acceleration,
-          'min_linear_velocity': options.min_linear_velocity
+          'min_linear_velocity': options.min_linear_velocity,
+          'max_angular_velocity': options.max_angular_velocity,
         }
         saccades, annotated_data = geometric_saccade_detect(all_data, params)
 

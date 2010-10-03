@@ -81,6 +81,7 @@ def create_pictures(rows, saccades, outdir, basename):
     
     fignames.append(basename + '-velocity_modulus.png')
     pylab.figure()
+    pylab.plot(T, rows['linear_velocity_modulus_smooth'], 'g-')
     pylab.plot(T, rows['linear_velocity_modulus'], '.')
     pylab.title('velocity modulus')
     mark_saccades(rows, saccades)
@@ -89,9 +90,22 @@ def create_pictures(rows, saccades, outdir, basename):
 
     fignames.append(basename + '-acceleration_modulus.png')
     pylab.figure()
+    pylab.plot(T, rows['linear_acceleration_modulus_smooth'], 'g-')
     pylab.plot(T, rows['linear_acceleration_modulus'], '.')
     pylab.title('acceleration modulus')
     mark_saccades(rows, saccades)
+    pylab.savefig(os.path.join(outdir, fignames[-1]))
+    pylab.close()
+
+
+    fignames.append(basename + '-angular_velocity_modulus.png')
+    pylab.figure()
+    pylab.plot(T, numpy.degrees(rows['angular_velocity_modulus']), '.')
+    pylab.title('angular velocity modulus')
+    pylab.ylabel('deg/s')
+    mark_saccades(rows, saccades)
+    a = pylab.axis()
+    pylab.axis([a[0], a[1], 0, 6000])
     pylab.savefig(os.path.join(outdir, fignames[-1]))
     pylab.close()
 
@@ -122,9 +136,11 @@ def create_pictures(rows, saccades, outdir, basename):
 
     fignames.append(basename + '-preference.png')
     pylab.figure()
-    pylab.plot(T, numpy.degrees(rows['preference']), '.')
+    pylab.plot(T, rows['preference'], '.')
     pylab.title('preference ')
     mark_saccades(rows, saccades)
+    a = pylab.axis()
+    pylab.axis([a[0], a[1], 0, a[3]])
     pylab.savefig(os.path.join(outdir, fignames[-1]))
     pylab.close()
 
@@ -207,10 +223,11 @@ def write_saccade_info_table(f, saccades, t0, t1):
             <th>Index</th>
             <th>Interval (s)</th>
             <th>Amplitude (deg)</th>
+            <th>Duration (s)</th>
+            <th>Angular velocity (deg/s)</th>
             <th>Sign</th>
             <th>Linear velocity  (m/s)</th>
             <th>Linear acceleration  (m/s^2)</th>
-            <th>Angular velocity (deg/s)</th>
             <th>Orientation (before -> after)</th>
             <th>Samples used (before, after)</th>
         </tr>
@@ -224,10 +241,11 @@ def write_saccade_info_table(f, saccades, t0, t1):
         f.write(' <td>%s</td>\n' % i) 
         f.write(' <td>%.2f</td>\n' % saccades[i]['time_passed'])
         f.write(' <td>%.1f</td>\n' % saccades[i]['amplitude'])
+        f.write(' <td>%.2f</td>\n' % saccades[i]['duration'])
+        f.write(' <td>%.3f</td>\n' % saccades[i]['top_velocity'])
         f.write(' <td>%d</td>\n' % saccades[i]['sign'])
-        f.write(' <td>%f</td>\n' % saccades[i]['linear_velocity_modulus'])
-        f.write(' <td>%f</td>\n' % saccades[i]['linear_acceleration_modulus'])
-        f.write(' <td>%f</td>\n' % saccades[i]['top_velocity'])
+        f.write(' <td>%.2f</td>\n' % saccades[i]['linear_velocity_modulus'])
+        f.write(' <td>%.2f</td>\n' % saccades[i]['linear_acceleration_modulus'])
         f.write(' <td>%d, %d</td>\n' % (saccades[i]['orientation_start'],
                                     saccades[i]['orientation_stop']))
         f.write(' <td>%d,%d</td>\n' % (

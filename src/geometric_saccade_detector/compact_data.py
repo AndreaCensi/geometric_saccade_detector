@@ -1,20 +1,21 @@
-import tables, numpy
+import os, numpy
 from optparse import OptionParser
+
 from geometric_saccade_detector.filesystem_utils import locate
 from geometric_saccade_detector import logger
-import os
-import scipy.io
-
-
-def h5_read_saccades(filename):
-    h5 = tables.openFile(filename, 'r')
-    saccades = numpy.array(h5.root.saccades, dtype=h5.root.saccades.dtype)
-    return saccades
+from geometric_saccade_detector.io import saccades_read_h5, saccades_write_h5, \
+    saccades_write_mat
+import sys
+import pickle
 
 def main():
     parser = OptionParser()
 
     (options, args) = parser.parse_args()
+
+    if len(args) != 1:
+        logger.error('I expect exactly one argument.')
+        sys.exit(-1)
 
     # detection parameters
     directory = args[0]
@@ -32,22 +33,37 @@ def main():
     all_data = []
     for i, file in enumerate(files):
         logger.info('Reading file %s' % file)
-        saccades = h5_read_saccades(file)
+        saccades = saccades_read_h5(file)
         saccades['sample_num'] = i
         all_data.append(saccades)
         
     saccades = numpy.concatenate(all_data)
     
-    output_file_mat = os.path.join(directory, 'saccades.mat') 
-    output_file_h5 = os.path.join(directory, 'saccades.h5')
+    select = saccades['stimulus'] == 'nopost'
+    saccades_noposts = saccades[select]
+    saccades_posts = saccades[numpy.logical_not(select)]
     
-    logger.info('Writing on %s' % output_file_h5)
-    h5file = tables.openFile(output_file_h5, mode="w")
-    h5file.createTable('/', 'saccades', saccades)
-    h5file.close()
+    for (data, name) in [
+            (saccades, 'saccades'),
+            (saccades_noposts, 'saccades-noposts'),
+            (saccades_posts, 'saccades-posts'),
+    ]:
+        out_mat = os.path.join(directory, '%s.mat' % name) 
+        out_h5 = os.path.join(directory, '%s.h5' % name)
+        out_pickle = os.path.join(directory, '%s.pickle' % name)
+
+        logger.info('Writing on %s (%d saccades)' % (out_h5, len(data)))
+        saccades_write_h5(out_h5, data)
+        
+        logger.info('Writing on %s (%d saccades)' % (out_mat, len(data)))
+        saccades_write_mat(out_mat, data)
+        
+        logger.info('Writing on %s (%d saccades)' % (out_pickle, len(data)))
+        pickle.dump(data, open(out_pickle, 'w'))
+        
+        
+        
     
-    logger.info('Writing to file %s' % output_file_mat)
-    scipy.io.savemat(output_file_mat, {'saccades':saccades}, oned_as='column')
     
     
         
