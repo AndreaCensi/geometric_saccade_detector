@@ -1,80 +1,343 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-	<title>AndreaCensi/geometric_saccade_detector @ GitHub</title>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>geometrical_saccade_detector &mdash; geometrical_saccade_detector v0.1 documentation</title>
+    <link rel="stylesheet" href="static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript" src="static/underscore.js"></script>
+    <script type="text/javascript" src="static/doctools.js"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="geometrical_saccade_detector v0.1 documentation" href="#" />
+	 
 	
-	<style type="text/css">
-		body {
-  		margin-top: 1.0em;
-  		background-color: #c61818;
-		  font-family: "Helvetica,Arial,FreeSans";
-  		color: #ffffff;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-		h1 { font-size: 3.8em; color: #39e7e7; margin-bottom: 3px; }
-		h1 .small { font-size: 0.4em; }
-		h1 a { text-decoration: none }
-		h2 { font-size: 1.5em; color: #39e7e7; }
-    h3 { text-align: center; color: #39e7e7; }
-    a { color: #39e7e7; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-		pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-	</style>
+   <style type="text/css">
+   .pagetoc { 
+	max-width: 30%;
+	display: block; float: right; margin-left: 3em; background-color: white; border: solid 2px gray;}
+   </style>
+
+   <style type="text/css">
+	div.col1 {
+		display: block;
+		float: left;
+	}
+
+	div.col2 {
+		margin-left: 3em;
+		display: block;
+		float: left;
+	}
+
+	div.after {
+		clear: left;
+	}
+
+	div.twitterbadge {
+		float: right;
+		margin-left: 2em;
+	}
+
+	img.bigpicture {
+		margin: 1em;
+		max-width: 90%;
+	}
 	
-</head>
+	.header h2 {
+		color: #990033 !important;
+		font-size: 200% !important;
+	}
+	.content {
+/*		padding-left: 5em; */
+	}
+	.content p, .content p {
+		max-width: 40em;
+	}
+	
+	.content h1 { 
+		display: none;
+	}
+	h2, h3 {  
+		border-bottom: solid 2px orange;
+		max-width: 40em;
+	}
+	
+	h1 { font-size: 200%;}
+	h2 { font-size: 150%;}
+	h3 { font-size: 125%;}
+	
+/*	body { font-size: 120%; font-family: Georgia,Serif !important;} */
+		
+	pre{
+		max-width: 60em;
+	/*	width: 80ex;*/
+	}
+	
+	body {  font-size: 120%; font-family: "Droid Serif", serif; }
+	
+	h1,h2,h3 { 
+  font-family: "Lobster", serif;
+  font-style: normal;
+  font-weight: 400;
+  text-shadow: 6px 6px 6px #ccc;
+}
 
-<body>
-  <a href="http://github.com/AndreaCensi/geometric_saccade_detector"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+div.header h2 {
+    font-size: 1.3em;
+    font-weight: normal;
+    letter-spacing: 1px;
+    text-transform: none !important;
+    color: #aaa;
+    border: 0;
+    margin-top: -3px;
+    padding: 0;
+}
 
-  <div id="container">
+/* On the first page */
 
-    <div class="download">
-      <a href="http://github.com/AndreaCensi/geometric_saccade_detector/zipball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
-      <a href="http://github.com/AndreaCensi/geometric_saccade_detector/tarball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
-    </div>
+.col1 strong, .col2 strong { 
+	font-family: "Lobster", serif; color: #990033;text-shadow: 6px 6px 6px #ccc;
+	font-size: 160%;
+ }
+ 
 
-    <h1><a href="http://github.com/AndreaCensi/geometric_saccade_detector">geometric_saccade_detector</a>
-      <span class="small">by <a href="http://github.com/AndreaCensi">AndreaCensi</a></span></h1>
+a.reference em, a.external em {
+	font-style: normal !important;
+}
 
-    <div class="description">
-      Geometric Fly Saccade Detector
-    </div>
+/* Remove top level */
+div.header h1.heading SPAN {display: none;}
 
-    <h2>Authors</h2>
-<p>Andrea Censi (andrea@cds.caltech.edu)<br/><br/>      </p>
-<h2>Contact</h2>
-<p>Andrea Censi (github@censi.org)<br/>      </p>
+</style>
+
+<link  href="http://fonts.googleapis.com/css?family=Lobster" rel="stylesheet" type="text/css" >
+<link  href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css" >
+<!--<link  href="http://fonts.googleapis.com/css?family=Cardo" rel="stylesheet" type="text/css" >-->
+
+<!--
+<script src="http://yui.yahooapis.com/3.1.0/build/yui/yui-min.js"></script>
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.1.0/build/cssreset/reset-context-min.css"></link>
+<script src="http://www.remarkbox.com/deploy/remarkbox-min.js"></script>
+<script type="text/javascript">
+YUI().use('remarkbox', function (Y) {
+Y.Remarkbox.remarkson.elements("p,code");
+Y.Remarkbox.remarkson.ids("para,tnt");
+Y.Remarkbox.remarkson.classes("rmkit,contentfeedback");
+Y.Remarkbox.remarktype.pointer("right");
+Y.Remarkbox.remarktype.strongcolor("#ECFCE8");
+Y.Remarkbox.remarktype.strongcolortext("#000000");
+Y.Remarkbox.remarktype.lightcolor("#FF8040");
+Y.Remarkbox.remarktype.lightcolortext("#800000");
+Y.Remarkbox.remarktype.alwaysvisible("true");
+Y.Remarkbox.remarktype.offsetx("-3em");
+Y.Remarkbox.remarktype.offsety("-2em");
+Y.Remarkbox.remarktype.allowanonymous("true");
+Y.Remarkbox.render();
+});
+</script>
+-->
 
 
-    <h2>Download</h2>
-    <p>
-      You can download this project in either
-      <a href="http://github.com/AndreaCensi/geometric_saccade_detector/zipball/master">zip</a> or
-      <a href="http://github.com/AndreaCensi/geometric_saccade_detector/tarball/master">tar</a> formats.
-    </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/AndreaCensi/geometric_saccade_detector</pre>
-    </p>
 
+  </head>
+  <body>
+      <div class="header"><h1 class="heading"><a href="#">
+          <span>geometrical_saccade_detector v0.1 documentation</span></a></h1>
+        <h2 class="heading"><span>geometrical_saccade_detector</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        <a class="uplink" href="#">Contents</a>
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="geometrical-saccade-detector">
+<h1><tt class="docutils literal"><span class="pre">geometrical_saccade_detector</span></tt><a class="headerlink" href="#geometrical-saccade-detector" title="Permalink to this headline">¶</a></h1>
+<p>This package provides a saccade detector suitable for fly trajectory.
+The executables contained are meant to work with the data provided
+by the <a class="reference external" href="http://www.its.caltech.edu/~astraw/research/flydra/">flydra</a> system; however, the main algorithm is pretty much
+isolated from the I/O routines, and it should be easy to apply to
+other sources of data.</p>
+<p>See <a class="reference external" href="static/DATA20080701_202506/index.html">this_example</a> of the algorithm output.</p>
+<img alt="Raw data" src="images/objid2-180.0-360.0-candidates1.png" style="width: 400px;" />
+<img alt="Saccade detection" src="images/objid2-180.0-360.0-xy1.png" style="width: 400px;" />
+<p>Left: Data from flydra system (Kalman filtered, not smoothed).
+Right: Detected saccades in the data. Each saccade is indicated
+by two lines that show the estimated initial and final
+orientation.</p>
+<div class="section" id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<p>Development happens on github:</p>
+<p><a class="reference external" href="http://github.com/AndreaCensi/geometrical_saccade_detector">http://github.com/AndreaCensi/geometrical_saccade_detector</a></p>
+
+<div style="float:right; margin-left: 2em" class="download">
+  <a href="http://github.com/AndreaCensi/geometric_saccade_detector/zipball/master">
+    <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
+  <a href="http://github.com/AndreaCensi/geometric_saccade_detector/tarball/master">
+    <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
+</div>
+
+<p>
+  You can download this project in either
+  <a href="http://github.com/AndreaCensi/geometric_saccade_detector/zipball/master">zip</a> or
+  <a href="http://github.com/AndreaCensi/geometric_saccade_detector/tarball/master">tar</a> formats.
+  You can also clone the project with <a href="http://git-scm.com">Git</a>
+  by running:
+  <pre>$ git clone git://github.com/AndreaCensi/geometric_saccade_detector</pre>
+</p></div>
+<div class="section" id="method">
+<h2>Method<a class="headerlink" href="#method" title="Permalink to this headline">¶</a></h2>
+<p>Detecting saccades is a pain. No, really! It is one of those problems that look easy, but
+the intuitive solution does not work as well. The problems come from three root causes:</p>
+<ul class="simple">
+<li>The fly dynamics is fast;</li>
+<li>The data is noisy;</li>
+<li>Flies do whatever they want.</li>
+</ul>
+<p>This package is the third iteration of the algorithm. It is a balance between simplicity and accuracy.</p>
+<p>The philosophy is to make as few data manipulation passes as possible, and have an algorithm which can
+be used on very noisy data with reasonable results.</p>
+<p><strong>add link to pdf with algorithm explanation</strong></p>
+</div>
+<div class="section" id="command-line-executables">
+<h2>Command line executables<a class="headerlink" href="#command-line-executables" title="Permalink to this headline">¶</a></h2>
+<p>There are two command line executables: <tt class="docutils literal"><span class="pre">geo_sac_detect</span></tt> and <tt class="docutils literal"><span class="pre">geo_sac_compact</span></tt>.</p>
+<div class="section" id="executable-geo-sac-detect">
+<h3>Executable <tt class="docutils literal"><span class="pre">geo_sac_detect</span></tt><a class="headerlink" href="#executable-geo-sac-detect" title="Permalink to this headline">¶</a></h3>
+<p>The first, <tt class="docutils literal"><span class="pre">geo_sac_detect</span></tt> is the main program that reads flydra&#8217;s <tt class="docutils literal"><span class="pre">.kh5</span></tt> files
+and produces a file with the list of saccades. It is invoked as follows:</p>
+<div class="highlight-python"><pre>$ geo_sac_detect  [--debug_output] [--nocache] --output &lt;DIR&gt;  &lt;files or directories&gt;</pre>
+</div>
+<p>You can pass either the name of some <tt class="docutils literal"><span class="pre">.kh5</span></tt> files, or names of directories containing
+them, in which case they will be searched recursively.</p>
+<p><tt class="docutils literal"><span class="pre">&lt;DIR&gt;</span></tt> is the output directory. Regardless of the directory structure of <tt class="docutils literal"><span class="pre">&lt;DIR&gt;</span></tt>, the files
+are stored here in a flat list. Three files are created for each sample:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">DIR/SAMPLE-saccades.h5</span></tt> &#8212; Authoritative format.</li>
+<li><tt class="docutils literal"><span class="pre">DIR/SAMPLE-saccades.mat</span></tt> &#8212; Matlab v7.2 format, useful for quick viewing from Matlab.</li>
+<li><tt class="docutils literal"><span class="pre">DIR/SAMPLE-saccades.pickle</span></tt> &#8212; Python serialization format, useful for quick viewing from ipython.</li>
+</ul>
+<p>If <tt class="docutils literal"><span class="pre">--nocache</span></tt> is not passed, the computation will be skipped if a computed file is already found in <tt class="docutils literal"><span class="pre">&lt;DIR&gt;</span></tt>.</p>
+<p>If <tt class="docutils literal"><span class="pre">--debug_output</span></tt> is passed, extensive HTML+png output will be created showing the
+detection results and intermediate computations. This is stored in <tt class="docutils literal"><span class="pre">&lt;DIR&gt;/&lt;sample&gt;/index.html</span></tt>.
+See _this_example.</p>
+<p>There are other options. There are a few options concerning flydra:</p>
+<div class="highlight-python"><pre>--min_frames_per_track   Minimum number of frames per track [= 400]
+--confirm_problems       Stop interactively on problems with log files'
+                         '(e.g.: cannot find valid obj_ids) [default: False]
+--smoothing              Uses Kalman-smoothed data. [default: false]
+--dynamic_model_name     Smoothing dynamical model [default: mamarama, units:  mm]</pre>
+</div>
+<p>Finally, there are several options for setting the detection parameters:</p>
+<div class="highlight-python"><pre>--deltaT_inner_sec                Inner interval [= 0.066]
+--deltaT_outer_sec                Outer interval [= 0.166 ]
+--min_amplitude_deg               Minimum saccade amplitude (deg) [= 25]
+--min_linear_velocity             Minimum linear velocity when saccading (m/s) [= 0.1]
+--max_linear_acceleration         Maximum linear acceleration when saccading (m/s^2) [=20]
+--max_angular_velocity            Maximum angular velocity when saccading (deg/s) [=8000]
+--max_orientation_dispersion_deg  Maximum dispersion (deg) [= 15]
+--minimum_interval_sec            Minimum interval between saccades. [= 0.166]</pre>
+</div>
+</div>
+<div class="section" id="executable-geo-sac-compact">
+<h3>Executable <tt class="docutils literal"><span class="pre">geo_sac_compact</span></tt><a class="headerlink" href="#executable-geo-sac-compact" title="Permalink to this headline">¶</a></h3>
+<p>This executable reads the data for each sample, and creates one file with a table containing the data for all samples.</p>
+<p>It is invoked as follows:</p>
+<div class="highlight-python"><pre>$  geo_sac_compact &lt;DIR&gt;</pre>
+</div>
+<p>It will look for files named <tt class="docutils literal"><span class="pre">&lt;DIR&gt;/&lt;SAMPLE&gt;-saccades.h5</span></tt> and it will create <tt class="docutils literal"><span class="pre">&lt;DIR&gt;/saccades.{h5,mat,pickle}</span></tt>.</p>
+</div>
+</div>
+<div class="section" id="algorithm">
+<h2>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this headline">¶</a></h2>
+<p><strong>to write</strong></p>
+</div>
+<div class="section" id="saccade-data-format">
+<h2>Saccade data format<a class="headerlink" href="#saccade-data-format" title="Permalink to this headline">¶</a></h2>
+<p>A <tt class="docutils literal"><span class="pre">.h5</span></tt> file created by <tt class="docutils literal"><span class="pre">geo_sac_detect</span></tt> and <tt class="docutils literal"><span class="pre">geo_sac_compact</span></tt> contains a single table called <tt class="docutils literal"><span class="pre">/saccades</span></tt>.</p>
+<p>The following are the most important fields:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">time_start</span></tt></dt>
+<dd>Timestamp at which the saccade started (seconds)</dd>
+<dt><tt class="docutils literal"><span class="pre">orientation_start</span></tt>, <tt class="docutils literal"><span class="pre">orientation_stop</span></tt></dt>
+<dd>Initial and final orientation (degrees)</dd>
+<dt><tt class="docutils literal"><span class="pre">time_passed</span></tt></dt>
+<dd>Time since last saccade (seconds).</dd>
+<dt><tt class="docutils literal"><span class="pre">amplitude</span></tt></dt>
+<dd>Saccade amplitude (degrees). This is always positive.</dd>
+<dt><tt class="docutils literal"><span class="pre">sign</span></tt></dt>
+<dd>Saccade direction (+1: left, -1: right)</dd>
+<dt><tt class="docutils literal"><span class="pre">top_velocity</span></tt></dt>
+<dd>Top velocity estimated during saccade (degrees/second). This is currently computed by smoothing the data for robustness, so it probably underestimates the true velocity.</dd>
+<dt><tt class="docutils literal"><span class="pre">duration</span></tt></dt>
+<dd>Saccade duration (computed as amplitude/top_velocity).</dd>
+</dl>
+<p>Note that all fields concerning angles use <strong>degrees</strong>, not radians.</p>
+<p>There are other fields used for DB purposes:</p>
+<dl class="docutils">
+<dt><tt class="docutils literal"><span class="pre">sample</span></tt></dt>
+<dd>The timestamp describing the sample. Format: <tt class="docutils literal"><span class="pre">YYYYMMDD_HHmmSS</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">sample_num</span></tt></dt>
+<dd>Index associated to a sample. Filled by <tt class="docutils literal"><span class="pre">geo_sac_compact</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">species</span></tt></dt>
+<dd>Currently set to Melanogaster.</dd>
+<dt><tt class="docutils literal"><span class="pre">stimulus</span></tt></dt>
+<dd>The stimulus used in mamarama.</dd>
+</dl>
+<p>There are still other fields used mainly for debug purposes. See the file <tt class="docutils literal"><span class="pre">structures.rb</span></tt> for a description.</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        <a class="uplink" href="#">Contents</a>
+        </p>
+
+      </div>
+
+	
     <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/AndreaCensi/geometric_saccade_detector">AndreaCensi/geometric_saccade_detector</a>
+        &copy; Copyright 2010, Andrea Censi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0pre.
     </div>
+	
+	<script type="text/javascript">
 
-  </div>
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-155626-11']);
+	  _gaq.push(['_trackPageview']);
 
-  
-</body>
+	  (function() {
+	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+	
+
+  </body>
 </html>
