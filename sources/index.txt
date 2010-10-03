@@ -39,7 +39,7 @@ Install
 
 Development happens on github: 
 
-http://github.com/AndreaCensi/geometrical_saccade_detector
+http://github.com/AndreaCensi/geometric_saccade_detector
 
 .. raw:: html
    :file: download.html
