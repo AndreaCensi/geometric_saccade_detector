@@ -1,5 +1,5 @@
 
-``geometrical_saccade_detector`` 
+The Geometric Saccade Detector
 ================================
 
 This package provides a saccade detector suitable for flies trajectories.
@@ -31,6 +31,7 @@ orientation.
 
 
 See this_example_ of the algorithm output for a typical flydra log.
+
 
 
 Install
