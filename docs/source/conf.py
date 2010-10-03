@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'geometrical_saccade_detector'
+project = u'The Geometric Saccade Detector'
 copyright = u'2010, Andrea Censi'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -181,7 +181,7 @@ htmlhelp_basename = 'GSDdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'geometrical_saccade_detector.tex', u'RepRep Documentation',
+  ('index', 'geometric_saccade_detector.tex', u'geometric_saccade_detector Documentation',
    u'Andrea Censi', 'manual'),
 ]
 
@@ -208,7 +208,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'geometrical_saccade_detector', u'geometrical_saccade_detector Documentation',
+    ('index', 'The Geometric Saccade Detector', u'geometric_saccade_detector Documentation',
      [u'Andrea Censi'], 1)
 ]
 
