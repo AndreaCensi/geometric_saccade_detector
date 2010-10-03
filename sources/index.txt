@@ -2,13 +2,13 @@
 ``geometrical_saccade_detector`` 
 ================================
 
-This package provides a saccade detector suitable for fly trajectory.
+This package provides a saccade detector suitable for flies trajectories.
+
 The executables contained are meant to work with the data provided
 by the flydra_ system; however, the main algorithm is pretty much 
 isolated from the I/O routines, and it should be easy to apply to
 other sources of data.
 
-See this_example_ of the algorithm output.
 
 .. _this_example: static/DATA20080701_202506/index.html
 
@@ -29,6 +29,8 @@ Right: Detected saccades in the data. Each saccade is indicated
 by two lines that show the estimated initial and final 
 orientation.
 
+
+See this_example_ of the algorithm output for a typical flydra log.
 
 
 Install
