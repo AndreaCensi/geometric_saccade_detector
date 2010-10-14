@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-import pickle, os, scipy.io, numpy, sys, platform, tables
+import  os, numpy, sys, platform
+
 from datetime import datetime
 from optparse import OptionParser 
 
