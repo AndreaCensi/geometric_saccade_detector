@@ -230,6 +230,7 @@ def write_saccade_info_table(f, saccades, t0, t1):
             <th>Linear acceleration  (m/s^2)</th>
             <th>Orientation (before -> after)</th>
             <th>Samples used (before, after)</th>
+            <th>sd</th>
         </tr>
     
     ''')
@@ -251,7 +252,7 @@ def write_saccade_info_table(f, saccades, t0, t1):
         f.write(' <td>%d,%d</td>\n' % (
                 saccades[i]['num_samples_used_before'],
                 saccades[i]['num_samples_used_after'])) 
-        
+        f.write(' <td>%.1f</td>\n' % saccades[i]['smooth_displacement'])
         f.write('</tr>\n')
     f.write('''
     </table>

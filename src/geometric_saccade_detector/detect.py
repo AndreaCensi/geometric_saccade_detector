@@ -9,6 +9,7 @@ from geometric_saccade_detector.flydra_db_utils import get_good_smoothed_tracks,
     get_good_files, timestamp_string_from_filename
 from geometric_saccade_detector.algorithm import geometric_saccade_detect
 from geometric_saccade_detector.filesystem_utils import get_user
+from geometric_saccade_detector.io import saccades_write_all
 
 
 def main():
@@ -77,7 +78,7 @@ def main():
                                 confirm_problems=options.confirm_problems)
 
     if len(good_files) == 0:
-        logger.error("No good files to process")
+        logger.error("No good files to process.")
         sys.exit(1)
 
     n = len(good_files)
@@ -87,12 +88,8 @@ def main():
         stim_fname = os.path.splitext(os.path.basename(stim_fname))[0]
         basename = os.path.splitext(os.path.basename(filename))[0]
         
-        output_saccades_mat = \
-            os.path.join(options.output_dir, basename + '-saccades.mat')        
-        output_saccades_hdf = \
-            os.path.join(options.output_dir, basename + '-saccades.h5')        
-        output_saccades_pickle = \
-            os.path.join(options.output_dir, basename + '-saccades.pickle')
+        output_basename = os.path.join(options.output_dir, basename + '-saccades')        
+        output_saccades_hdf = output_basename + '.h5'
             
         if os.path.exists(output_saccades_hdf) and not options.nocache:
             logger.info('File %s exists; skipping. (use --nocache to ignore)' % \
@@ -133,26 +130,13 @@ def main():
         # other fields used for managing different samples, used in the analysis
         saccades['species'] = 'Dmelanogaster'
         saccades['stimulus'] = stim_fname
-        sample_name = timestamp_string_from_filename(filename)
+        sample_name = 'DATA' + timestamp_string_from_filename(filename)
         saccades['sample'] = sample_name
         saccades['sample_num'] = -1 # will be filled in by someone else
         saccades['processed'] = processed    
     
-        # Write matlab output
-        logger.info("Writing to %s" % output_saccades_mat)
-        scipy.io.savemat(output_saccades_mat, {'saccades':saccades},
-                         oned_as='column')
-    
-        # Write pickle output
-        logger.info("Writing to %s" % output_saccades_pickle)
-        pickle.dump({'saccades':saccades}, open(output_saccades_pickle, 'wb'))
-    
-        # Write h5 output
-        logger.info("Writing to %s" % output_saccades_hdf)
-        h5file = tables.openFile(output_saccades_hdf, mode="w")
-        h5file.createTable('/', 'saccades', saccades,
-                    title="Detected saccades for sample %s" % sample_name)
-        h5file.close()
+        logger.info("Writing to %s {h5,mat,pickle}" % output_basename)
+        saccades_write_all(output_basename, saccades)
         
         # Write debug figures
         if options.debug_output:

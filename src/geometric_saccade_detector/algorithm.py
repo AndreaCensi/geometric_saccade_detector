@@ -3,7 +3,7 @@ from geometric_saccade_detector import logger
 from geometric_saccade_detector.structures import saccade_dtype, annotation_dtype
 from geometric_saccade_detector.math_utils import merge_fields, \
     compute_derivative, find_indices_in_bounds, get_orientation_and_dispersion, \
-    normalize_pi, smooth1d
+    normalize_pi, smooth1d, normalize_180
                                  
 def geometric_saccade_detect(rows, params):
     ''' Detects saccades in a log fragment. 
@@ -40,11 +40,11 @@ def geometric_saccade_detect(rows, params):
     if len(rows) <= minimum_acceptable_length:
         raise ValueError('I cannot do much with only %s entries.' % len(rows))
     
-    required_fields = ['obj_id', 'timestamp', 'x', 'y', 'xvel', 'yvel']
+    required_fields = ['obj_id', 'frame', 'timestamp', 'x', 'y', 'xvel', 'yvel']
     for field in required_fields:
         if not field in rows.dtype.fields:
             raise ValueError('Cannot find required field "%s" in dtype %s' % \
-                             field, rows.dtype)
+                             (field, rows.dtype))
         values = rows[field]
         num_nan = numpy.isnan(values).sum()
         num_inf = numpy.isinf(values).sum()
@@ -59,6 +59,7 @@ def geometric_saccade_detect(rows, params):
     #  at most a few seconds)
     timestamp = rows['timestamp']
     obj_id = rows['obj_id']
+    frame = rows['frame']
     
     # check each consecutive pair of rows that have the same obj_id
     for i in range(len(rows) - 1):
@@ -153,7 +154,7 @@ def geometric_saccade_detect(rows, params):
         
         # the net angle is estimated as  before_orientation - after_orientation
         
-        turning_angle = normalize_pi(orientation_start - orientation_stop) 
+        turning_angle = normalize_pi(orientation_stop - orientation_start) 
         amplitude = abs(turning_angle)
         
         candidate = \
@@ -235,6 +236,8 @@ def geometric_saccade_detect(rows, params):
         saccade['num_samples_used_before'] = annotations['num_samples_used_before'][i]
         saccade['x'] = rows['x'][i]
         saccade['y'] = rows['y'][i]
+        saccade['frame'] = rows['frame'][i]
+        saccade['obj_id'] = rows['obj_id'][i]
         saccade['top_velocity'] = numpy.degrees(top_velocity)
         saccade['duration'] = duration
         
@@ -257,14 +260,18 @@ def geometric_saccade_detect(rows, params):
     # now compute time_passed; discarding one first saccade
     for i in range(1, len(saccades)):
         saccades[i]['time_passed'] = \
-            saccades[i]['time_start'] - saccades[i - 1]['time_start'];  
-        assert saccades[i]['time_passed'] > 0
+            saccades[i]['time_start'] - saccades[i - 1]['time_start']
+        assert saccades[i]['time_passed'] > 0  
+        saccades[i]['smooth_displacement'] = \
+            normalize_180(saccades[i]['orientation_start'] - 
+                          saccades[i - 1]['orientation_stop'])
+        
         
     # remove first saccade (cannot compute time_passed)
     saccades.pop(0)
     
     annotated_rows = merge_fields(rows, annotations)
-    # convert to a big numpy array, excluding the first
+    # convert to a big numpy array 
     if len(saccades) > 0:
         n = len(saccades)
         logger.info("Found %d saccades" % n)

@@ -5,6 +5,7 @@
 rows_dtype = [  
     ('timestamp', 'float64'),
     ('obj_id', 'int'),
+    ('frame', 'int'),
     ('x', 'float32'),
     ('y', 'float32'),
     ('xvel', 'float32'),
@@ -36,10 +37,13 @@ saccade_dtype = [
     
     # Specific to mamarama data
     ('time_middle', 'float64'),
+    ('frame', 'int'),
+    ('obj_id', 'int'),
     ('x', 'float64'), # x position in arena
     ('y', 'float64'), # y position in arena
     ('linear_velocity_modulus', 'float64'), # m/s
     ('linear_acceleration_modulus', 'float64'),
+    ('smooth_displacement', 'float64'),
 
     # Number of samples used to average orientation_start,_stop.
     ('num_samples_used_before', 'uint8'),

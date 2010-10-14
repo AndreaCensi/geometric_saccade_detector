@@ -1,9 +1,23 @@
 import numpy
 import tables
+import os
 import scipy.io
+
 from geometric_saccade_detector.structures import saccade_dtype
 from geometric_saccade_detector import logger
 
+
+def saccades_write_all(basename, saccades):
+    ''' Writes in all the output types we know. ``basename`` is
+        the file name without the extension. '''
+    # just in case
+    basename = os.path.splitext(basename)[0]
+    dirname = os.path.dirname(basename)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    saccades_write_h5(basename + '.h5', saccades)
+    saccades_write_mat(basename + '.mat', saccades)
+    
 def saccades_read_h5(filename):
     h5 = tables.openFile(filename, 'r')
     saccades = numpy.array(h5.root.saccades, dtype=h5.root.saccades.dtype)
@@ -12,7 +26,18 @@ def saccades_read_h5(filename):
 
 def saccades_write_h5(filename, saccades):
     h5file = tables.openFile(filename, mode="w")
-    h5file.createTable('/', 'saccades', saccades)
+    table = h5file.createTable('/', 'saccades', saccades)
+    # if there is only one sample, then add a symbolic link 
+    # to /flydra/samples/<SAMPLE>/saccades
+    num_samples = len(numpy.unique(saccades[:]['sample']))
+    if num_samples == 1:
+        id = saccades[0]['sample']
+        parent = '/flydra/samples/%s' % id
+        name = 'saccades'
+        target = table 
+        h5file.createHardLink(where=parent, name=name, target=target,
+                              createparents=True)
+    
     h5file.close()
     
 def saccades_write_mat(filename, saccades):

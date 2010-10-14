@@ -87,6 +87,10 @@ def normalize_pi(a):
     ''' Normalizes an angle in [-pi, pi] '''
     return numpy.arctan2(numpy.sin(a), numpy.cos(a))
     
+def normalize_180(d):
+    ''' Normalizes an angle, expressed in degrees, in the [-180,180] interval. '''
+    return numpy.degrees(normalize_pi(numpy.radians(d)))
+    
 from scipy import signal
 
 def compute_derivative(x, timestamp):
