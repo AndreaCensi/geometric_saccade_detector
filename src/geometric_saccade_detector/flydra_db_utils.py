@@ -13,6 +13,7 @@ def  consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml")
     """ Parses the corresponding fanout XML and finds IDs to use as well as the stimulus.
         Returns 3 values: valid, use_objs_ids, stimulus.  
         valid is false if something was wrong"""
+   
     try:
         dir = os.path.dirname(h5file)
         fanout_xml = os.path.join(dir, fanout_name)
@@ -47,7 +48,10 @@ def  consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml")
         if verbose_problems:
             logger.error("Caught ValueError for '%s': %s" % (file_timestamp, ex))
         return False, None, None 
-        
+    except Exception, ex:
+	logger.error('Not predicted exception while reading %s; %s' % (h5file, ex))
+	return False, None, None
+    
         
 def get_good_files(where, pattern="*.kh5", fanout_template="fanout.xml", verbose=False, confirm_problems=False):
     """ Looks for .kh5 files in the filesystem. 
