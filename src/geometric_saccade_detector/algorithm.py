@@ -234,12 +234,14 @@ def geometric_saccade_detect(rows, params):
         saccade['orientation_stop'] = numpy.degrees(annotations['orientation_stop'][i])
         saccade['num_samples_used_after'] = annotations['num_samples_used_after'][i]
         saccade['num_samples_used_before'] = annotations['num_samples_used_before'][i]
-        saccade['x'] = rows['x'][i]
-        saccade['y'] = rows['y'][i]
-        saccade['frame'] = rows['frame'][i]
-        saccade['obj_id'] = rows['obj_id'][i]
         saccade['top_velocity'] = numpy.degrees(top_velocity)
         saccade['duration'] = duration
+        # mamarama data
+        saccade['position'] = numpy.array([rows['x'][i], rows['y'][i], rows['z'][i]])
+        saccade['linear_velocity_world'] = \
+            numpy.array([rows['xvel'][i], rows['yvel'][i], rows['zvel'][i]])
+        saccade['frame'] = rows['frame'][i]
+        saccade['obj_id'] = rows['obj_id'][i]
         
         saccades.append(saccade)
         

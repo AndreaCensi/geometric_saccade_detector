@@ -8,8 +8,10 @@ rows_dtype = [
     ('frame', 'int'),
     ('x', 'float32'),
     ('y', 'float32'),
+    ('z', 'float32'),
     ('xvel', 'float32'),
-    ('yvel', 'float32')
+    ('yvel', 'float32'),
+    ('zvel', 'float32'),
 ]
 
 # Note that all this data is expressed in degrees, not radians.
@@ -39,8 +41,8 @@ saccade_dtype = [
     ('time_middle', 'float64'),
     ('frame', 'int'),
     ('obj_id', 'int'),
-    ('x', 'float64'), # x position in arena
-    ('y', 'float64'), # y position in arena
+    ('position', ('float64', 3)),
+    ('linear_velocity_world', ('float64', 3)),
     ('linear_velocity_modulus', 'float64'), # m/s
     ('linear_acceleration_modulus', 'float64'),
     ('smooth_displacement', 'float64'),
