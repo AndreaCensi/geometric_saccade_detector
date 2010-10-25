@@ -91,15 +91,19 @@ def normalize_180(d):
     ''' Normalizes an angle, expressed in degrees, in the [-180,180] interval. '''
     return numpy.degrees(normalize_pi(numpy.radians(d)))
     
-from scipy import signal
+import scipy
+import scipy.signal
+
 
 def compute_derivative(x, timestamp):
     dt = timestamp[1] - timestamp[0]
-    deriv_filter = numpy.array([-0.5, 0, 0.5] / dt)
-    d = signal.convolve(x, deriv_filter, mode=1) #@UndefinedVariable
+    deriv_filter = numpy.array([0.5, 0, -0.5] / dt)
+    d = scipy.signal.convolve(x, deriv_filter, mode=1) #@UndefinedVariable
     d[0] = d[1]
     d[-1] = d[-2]
     return d        
+
+
 
 
 
