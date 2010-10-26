@@ -105,8 +105,6 @@ def compute_derivative(x, timestamp):
 
 
 
-
-
 # Taken from the numpy cookbook
 
 def smooth1d(x, window_len=11, window='hanning'):
