@@ -49,8 +49,8 @@ def  consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml")
             logger.error("Caught ValueError for '%s': %s" % (file_timestamp, ex))
         return False, None, None 
     except Exception, ex:
-	logger.error('Not predicted exception while reading %s; %s' % (h5file, ex))
-	return False, None, None
+        logger.error('Not predicted exception while reading %s; %s' % (h5file, ex))
+        return False, None, None
     
         
 def get_good_files(where, pattern="*.kh5", fanout_template="fanout.xml", verbose=False, confirm_problems=False):
@@ -86,12 +86,12 @@ def get_good_files(where, pattern="*.kh5", fanout_template="fanout.xml", verbose
     return good_files
 
 
-
 def timestamp_string_from_filename(filename):
     """Extracts timestamp string from filename"""
     ### TODO: check validity
     data_file_path, data_file_base = os.path.split(filename) #@UnusedVariable
     return data_file_base[4:19]
+
 
 def get_good_smoothed_tracks(filename, obj_ids,
                              min_frames_per_track,

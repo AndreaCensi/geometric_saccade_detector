@@ -52,7 +52,20 @@ def saccades_read_mat(filename):
                                 struct_as_record=True, squeeze_me=True)
     data = contents['saccades'] 
 
-    return enforce_saccade_dtype(data)
+    saccades = enforce_saccade_dtype(data)
+    
+    # check the important things are ok
+    
+    for field in ['time_passed']:
+        x = saccades[field]
+        ok = numpy.isfinite(x)
+        bad, = numpy.nonzero(numpy.logical_not(ok))
+        if len(bad):
+            print 'Fixing %d/%d non finite data in %s in %s' % \
+                (len(bad), len(saccades), field, filename)
+            saccades = saccades[ok]
+            
+    return saccades
 
 def enforce_saccade_dtype(data):
     saccades = numpy.zeros(shape=(len(data),), dtype=saccade_dtype)
