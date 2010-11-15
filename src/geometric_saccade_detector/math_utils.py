@@ -18,9 +18,11 @@ def merge_fields(a, b):
 
     c = numpy.ndarray(shape=a.shape, dtype=new_dtype)
     for f in a.dtype.fields:
-        c[f] = a[f][:]
+        # c[f] = a[f][:]   not working on pytables
+        c[f] = a[:][f]
     for f in b.dtype.fields:
-        c[f] = b[f][:]
+        # c[f] = b[f][:]
+        c[f] = b[:][f]
     return c
 
 
