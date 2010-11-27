@@ -56,8 +56,8 @@ saccade_dtype = [
 # intermediate computations.
 # Note that all this data is expressed in *radians*, not degrees.
 annotation_dtype = [
-    ('orientation_start', 'float64'),
-    ('orientation_stop', 'float64'),
+    #('orientation_start', 'float64'), XXX repeated?
+    #('orientation_stop', 'float64'),
     ('before_dispersion', 'float64'),
     ('after_dispersion', 'float64'),
     ('turning_angle', 'float64'),
