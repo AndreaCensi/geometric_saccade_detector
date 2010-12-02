@@ -102,7 +102,7 @@ def main():
         # concatenate all in one track
         all_data = None
 
-        for obj_id, rows in get_good_smoothed_tracks(
+        for obj_id, rows in get_good_smoothed_tracks( #@UnusedVariable
                 filename=filename,
                 obj_ids=obj_ids,
                 min_frames_per_track=options.min_frames_per_track,

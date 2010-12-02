@@ -59,7 +59,7 @@ def geometric_saccade_detect(rows, params):
     #  at most a few seconds)
     timestamp = rows['timestamp']
     obj_id = rows['obj_id']
-    frame = rows['frame']
+    #frame = rows['frame']
     
     # check each consecutive pair of rows that have the same obj_id
     for i in range(len(rows) - 1):

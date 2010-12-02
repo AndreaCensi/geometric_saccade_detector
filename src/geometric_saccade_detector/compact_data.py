@@ -11,7 +11,7 @@ import pickle
 def main():
     parser = OptionParser()
 
-    (options, args) = parser.parse_args()
+    (options, args) = parser.parse_args() #@UnusedVariable
 
     if len(args) != 1:
         logger.error('I expect exactly one argument.')

@@ -1,4 +1,6 @@
 import numpy
+import scipy.signal
+
 
 def merge_fields(a, b):
     ''' Merge the fields of the two numpy arrays a,b. 
@@ -93,8 +95,6 @@ def normalize_180(d):
     ''' Normalizes an angle, expressed in degrees, in the [-180,180] interval. '''
     return numpy.degrees(normalize_pi(numpy.radians(d)))
     
-import scipy
-import scipy.signal
 
 
 def compute_derivative(x, timestamp):

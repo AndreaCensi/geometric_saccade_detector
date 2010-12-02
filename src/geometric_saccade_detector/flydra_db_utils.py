@@ -36,8 +36,8 @@ def  consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml")
 
 #        stim_xml = fanout.get_stimulus_for_timestamp(timestamp_string=file_timestamp)
 
-        (single_episode, kh5_file, stim_fname) = fanout._get_episode_for_timestamp(timestamp_string=file_timestamp)
-         
+        episode = fanout._get_episode_for_timestamp(timestamp_string=file_timestamp) 
+        (single_episode, kh5_file, stim_fname) = episode #@UnusedVariable
         return True, use_obj_ids, stim_fname
 
     except xml_stimulus.WrongXMLTypeError:

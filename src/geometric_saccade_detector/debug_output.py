@@ -11,8 +11,8 @@ def mark_saccades(rows, saccades):
         if not (timestamp[0] <= saccades[i]['time_middle'] <= timestamp[-1]):
             continue
             
-        n_start = saccades[i]['time_start'] - timestamp[0]
-        n_stop = saccades[i]['time_stop'] - timestamp[0]
+        # n_start = saccades[i]['time_start'] - timestamp[0]
+        # n_stop = saccades[i]['time_stop'] - timestamp[0]
         n_middle = saccades[i]['time_middle'] - timestamp[0]
         
         #pylab.plot([n_start, n_start], [a[2], a[3]], 'g-')
@@ -54,8 +54,8 @@ def create_pictures(rows, saccades, outdir, basename):
     fignames = []
     x = rows['x']
     y = rows['y']
-    vx = rows['xvel']
-    vy = rows['yvel'] 
+    #vx = rows['xvel']
+    #vy = rows['yvel'] 
     T = rows['timestamp'] 
     T = T - T[0]
     
