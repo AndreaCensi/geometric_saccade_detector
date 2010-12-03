@@ -1,9 +1,9 @@
 import numpy
-from geometric_saccade_detector import logger
-from geometric_saccade_detector.structures import saccade_dtype, annotation_dtype
-from geometric_saccade_detector.math_utils import merge_fields, \
-    compute_derivative, find_indices_in_bounds, get_orientation_and_dispersion, \
-    normalize_pi, smooth1d, normalize_180
+
+from .logger import logger
+from .structures import saccade_dtype, annotation_dtype
+from .math_utils import merge_fields, compute_derivative, find_indices_in_bounds, \
+    get_orientation_and_dispersion, normalize_pi, smooth1d, normalize_180
                                  
 def geometric_saccade_detect(rows, params):
     ''' Detects saccades in a log fragment. 

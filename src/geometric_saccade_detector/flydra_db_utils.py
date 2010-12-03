@@ -1,13 +1,13 @@
-import numpy
+import numpy, os
+
 import flydra.a2.core_analysis as core_analysis
-from geometric_saccade_detector import logger
-from geometric_saccade_detector.structures import rows_dtype
-import os
 from flydra.a2 import xml_stimulus
-from geometric_saccade_detector.filesystem_utils import locate_roots
+
+from .logger import logger
+from .structures import rows_dtype
+from .filesystem_utils import locate_roots
 
 warned_fixed_dt = False
-
 
 def  consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml"):
     """ Parses the corresponding fanout XML and finds IDs to use as well as the stimulus.

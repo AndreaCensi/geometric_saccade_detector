@@ -1,16 +1,15 @@
-#!/usr/bin/env python
 import  os, numpy, sys, platform
-
 from datetime import datetime
 from optparse import OptionParser 
 
-from geometric_saccade_detector import logger, version
-from geometric_saccade_detector.debug_output import write_debug_output
-from geometric_saccade_detector.flydra_db_utils import get_good_smoothed_tracks, \
-    get_good_files, timestamp_string_from_filename
-from geometric_saccade_detector.algorithm import geometric_saccade_detect
-from geometric_saccade_detector.filesystem_utils import get_user
-from geometric_saccade_detector.io import saccades_write_all
+from . import version # XXX: make this coherent
+from .logger import logger
+from .debug_output import write_debug_output
+from .algorithm import geometric_saccade_detect
+from .filesystem_utils import get_user
+from .io import saccades_write_all
+from .flydra_db_utils import get_good_smoothed_tracks, \
+     get_good_files, timestamp_string_from_filename
 
 
 def main():
@@ -102,7 +101,7 @@ def main():
         # concatenate all in one track
         all_data = None
 
-        for obj_id, rows in get_good_smoothed_tracks( #@UnusedVariable
+        for obj_id, rows in get_good_smoothed_tracks(#@UnusedVariable
                 filename=filename,
                 obj_ids=obj_ids,
                 min_frames_per_track=options.min_frames_per_track,

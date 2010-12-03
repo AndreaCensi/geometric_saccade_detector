@@ -1,7 +1,7 @@
 ''' Utils to look for files in the filesystem respecting certain patterns. '''
 
-import os, fnmatch 
-import pwd
+import os, fnmatch, pwd
+
 
 def locate(pattern, root):
     '''Locate all files matching supplied filename pattern in and below

@@ -1,11 +1,7 @@
-import numpy
-import tables
-import os
-import scipy.io
+import numpy, tables, os, scipy.io
 
-from geometric_saccade_detector.structures import saccade_dtype
-from geometric_saccade_detector import logger
-
+from .logger import logger
+from .structures import saccade_dtype
 
 def saccades_write_all(basename, saccades):
     ''' Writes in all the output types we know. ``basename`` is

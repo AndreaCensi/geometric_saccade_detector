@@ -1,12 +1,10 @@
-import os, numpy
+import os, numpy, sys, pickle
 from optparse import OptionParser
 
-from geometric_saccade_detector.filesystem_utils import locate
-from geometric_saccade_detector import logger
-from geometric_saccade_detector.io import saccades_read_h5, saccades_write_h5, \
-    saccades_write_mat
-import sys
-import pickle
+from .logger import logger
+from .filesystem_utils import locate
+from .io import saccades_read_h5, saccades_write_h5, saccades_write_mat
+
 
 def main():
     parser = OptionParser()
