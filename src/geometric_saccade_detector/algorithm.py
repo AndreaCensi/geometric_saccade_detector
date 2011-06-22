@@ -1,14 +1,16 @@
-import numpy
+import numpy as np
 
 from .logger import logger
 from .structures import saccade_dtype, annotation_dtype
 from .math_utils import merge_fields, compute_derivative, find_indices_in_bounds, \
     get_orientation_and_dispersion, normalize_pi, smooth1d, normalize_180
+                   
+from .well_formed_saccade import check_saccade_is_well_formed
                                  
 def geometric_saccade_detect(rows, params):
     ''' Detects saccades in a log fragment. 
     
-        Rows is a numpy array with at least the fields
+        Rows is a np array with at least the fields
             timestamp, obj_id, x, y, xvel, yvel.
         
         params should be a dict with the following keys:
@@ -21,7 +23,7 @@ def geometric_saccade_detect(rows, params):
           'max_linear_acceleration',
           'max_angular_velocity'
         
-        Returns a tuple of two numpy arrays. 
+        Returns a tuple of two np arrays. 
         The first is the saccade array (using saccade_dtype),
         the other is a copy of rows with additional fields
         describing the intermediate computation, useful for debug
@@ -30,7 +32,7 @@ def geometric_saccade_detect(rows, params):
     minimum_acceptable_length = 30
     
     # do some sanity tests
-    if not isinstance(rows, numpy.ndarray):
+    if not isinstance(rows, np.ndarray):
         raise ValueError('Expected ndarray, not %s' % rows.__class__.__name__)
     
     if len(rows.shape) != 1:
@@ -46,8 +48,8 @@ def geometric_saccade_detect(rows, params):
             raise ValueError('Cannot find required field "%s" in dtype %s' % \
                              (field, rows.dtype))
         values = rows[field]
-        num_nan = numpy.isnan(values).sum()
-        num_inf = numpy.isinf(values).sum()
+        num_nan = np.isnan(values).sum()
+        num_inf = np.isinf(values).sum()
         if num_nan > 0 or num_inf > 0:
             raise ValueError('Found invalid data for field "%s": '
                              'nan %d inf %d (len %d)' % \
@@ -76,11 +78,9 @@ def geometric_saccade_detect(rows, params):
         if dt > maximum_dt_allowed:
             raise ValueError('Detected dt %.3f > %.3f at index %d/%d' % \
                              (dt, maximum_dt_allowed, i, len(rows)))
+      
     
-
-    #saccades = numpy.ndarray(dtype=saccade_dtype, shape=(0,))    
-    
-    annotations = numpy.ndarray(dtype=annotation_dtype, shape=rows.shape)
+    annotations = np.zeros(dtype=annotation_dtype, shape=rows.shape)
     
     # Get parameters for detection
     
@@ -98,11 +98,11 @@ def geometric_saccade_detect(rows, params):
     xvel, yvel = rows['xvel'], rows['yvel']
     
     # compute velocity and acceleration
-    annotations['linear_velocity_modulus'] = numpy.sqrt(xvel ** 2 + yvel ** 2)
+    annotations['linear_velocity_modulus'] = np.sqrt(xvel ** 2 + yvel ** 2)
     
     xacc = compute_derivative(rows['xvel'], timestamp)
     yacc = compute_derivative(rows['yvel'], timestamp)
-    annotations['linear_acceleration_modulus'] = numpy.sqrt(xacc ** 2 + yacc ** 2)
+    annotations['linear_acceleration_modulus'] = np.sqrt(xacc ** 2 + yacc ** 2)
     
     # smooth both to compute angular velocity
     annotations['linear_velocity_modulus_smooth'] = \
@@ -114,12 +114,23 @@ def geometric_saccade_detect(rows, params):
     
     #annotations['angular_velocity_modulus'] = \
     #   annotations['linear_acceleration_modulus'] / annotations['linear_velocity_modulus']
-    annotations['angular_velocity_modulus'] = \
-        annotations['linear_acceleration_modulus_smooth'] / \
-        annotations['linear_velocity_modulus_smooth']
-        
+    
+#    annotations['angular_velocity_modulus'] = \
+#        annotations['linear_acceleration_modulus_smooth'] / \
+#        annotations['linear_velocity_modulus_smooth']
+#        
     for i in range(len(rows)):
         
+        if annotations['linear_acceleration_modulus_smooth'][i] > 0:
+            annotations['angular_velocity_modulus'][i] = \
+                annotations['linear_acceleration_modulus_smooth'][i] / \
+                annotations['linear_velocity_modulus_smooth'][i]
+        else:
+            annotations['angular_velocity_modulus'][i] = np.NaN  
+            annotations['considered'][i] = 0
+            annotations['candidate'][i] = 0 
+            continue
+    
         # make sure we have enough log before and after
         if (timestamp[i] - timestamp[0] < deltaT_outer_sec) or \
            (timestamp[-1] - timestamp[i] < deltaT_inner_sec):
@@ -146,7 +157,7 @@ def geometric_saccade_detect(rows, params):
         before_orientation_inverted, before_dispersion = \
             get_orientation_and_dispersion(rows, center=i, indices=before)
             
-        orientation_start = before_orientation_inverted + numpy.pi
+        orientation_start = before_orientation_inverted + np.pi
  
         orientation_stop, after_dispersion = \
             get_orientation_and_dispersion(rows, center=i, indices=after)
@@ -158,13 +169,13 @@ def geometric_saccade_detect(rows, params):
         amplitude = abs(turning_angle)
         
         candidate = \
-            (before_dispersion <= numpy.radians(max_orientation_dispersion_deg)) and \
-            (after_dispersion <= numpy.radians(max_orientation_dispersion_deg)) and \
-            (amplitude >= numpy.radians(min_amplitude_deg)) and \
+            (before_dispersion <= np.radians(max_orientation_dispersion_deg)) and \
+            (after_dispersion <= np.radians(max_orientation_dispersion_deg)) and \
+            (amplitude >= np.radians(min_amplitude_deg)) and \
             (annotations['linear_velocity_modulus'][i] >= min_linear_velocity) and \
             (annotations['linear_acceleration_modulus'][i] <= max_linear_acceleration) and \
-            (annotations['angular_velocity_modulus'][i] <= numpy.radians(max_angular_velocity)) and \
-            (annotations['angular_velocity_modulus'][i] >= numpy.radians(100)) 
+            (annotations['angular_velocity_modulus'][i] <= np.radians(max_angular_velocity)) and \
+            (annotations['angular_velocity_modulus'][i] >= np.radians(100)) 
 
         preference = amplitude - 0.5 * before_dispersion - 0.5 * after_dispersion
 
@@ -177,7 +188,7 @@ def geometric_saccade_detect(rows, params):
         annotations['turning_angle'][i] = turning_angle
         annotations['amplitude'][i] = amplitude  
         annotations['preference'][i] = preference
-        annotations['sign'][i] = numpy.sign(turning_angle)
+        annotations['sign'][i] = np.sign(turning_angle)
         annotations['num_samples_used_before'][i] = len(before)
         annotations['num_samples_used_after'][i] = len(after)
 
@@ -189,9 +200,11 @@ def geometric_saccade_detect(rows, params):
         if not annotations['considered'][i] or not annotations['candidate'][i]:
             preferences[i] = -15 # like -inf, but nicer in the plots
             
-    ordered_indices = numpy.argsort(-preferences)
+    ordered_indices = np.argsort(-preferences)
     # make sure we are sorting from big to small
-    assert preferences[ordered_indices[0]] >= preferences[ordered_indices[-1]]
+    assert preferences[ordered_indices[0]] >= preferences[ordered_indices[-1]], \
+            "Strange: not %s >= %s" % (preferences[ordered_indices[0]],
+                                       preferences[ordered_indices[-1]])
     
     saccades = []
     # while looking for saccades, mark as used 
@@ -219,8 +232,8 @@ def geometric_saccade_detect(rows, params):
         duration = annotations['amplitude'][i] / top_velocity
         
         # ok, let's mark this point as a saccade 
-        saccade = numpy.ndarray(dtype=saccade_dtype, shape=())
-        saccade['top_velocity'] = numpy.NaN
+        saccade = np.ndarray(dtype=saccade_dtype, shape=())
+        saccade['top_velocity'] = np.NaN
         saccade['time_start'] = timestamp[i] - deltaT_outer_sec
         saccade['time_middle'] = timestamp[i]
         saccade['linear_velocity_modulus'] = \
@@ -228,18 +241,18 @@ def geometric_saccade_detect(rows, params):
         saccade['linear_acceleration_modulus'] = \
             annotations['linear_acceleration_modulus'][i]
         saccade['time_stop'] = timestamp[i] + deltaT_outer_sec
-        saccade['amplitude'] = numpy.degrees(annotations['amplitude'][i])
+        saccade['amplitude'] = np.degrees(annotations['amplitude'][i])
         saccade['sign'] = annotations['sign'][i]
-        saccade['orientation_start'] = numpy.degrees(annotations['orientation_start'][i])
-        saccade['orientation_stop'] = numpy.degrees(annotations['orientation_stop'][i])
+        saccade['orientation_start'] = np.degrees(annotations['orientation_start'][i])
+        saccade['orientation_stop'] = np.degrees(annotations['orientation_stop'][i])
         saccade['num_samples_used_after'] = annotations['num_samples_used_after'][i]
         saccade['num_samples_used_before'] = annotations['num_samples_used_before'][i]
-        saccade['top_velocity'] = numpy.degrees(top_velocity)
+        saccade['top_velocity'] = np.degrees(top_velocity)
         saccade['duration'] = duration
         # mamarama data
-        saccade['position'] = numpy.array([rows['x'][i], rows['y'][i], rows['z'][i]])
+        saccade['position'] = np.array([rows['x'][i], rows['y'][i], rows['z'][i]])
         saccade['linear_velocity_world'] = \
-            numpy.array([rows['xvel'][i], rows['yvel'][i], rows['zvel'][i]])
+            np.array([rows['xvel'][i], rows['yvel'][i], rows['zvel'][i]])
         saccade['frame'] = rows['frame'][i]
         saccade['obj_id'] = rows['obj_id'][i]
         
@@ -273,17 +286,19 @@ def geometric_saccade_detect(rows, params):
     saccades.pop(0)
     
     annotated_rows = merge_fields(rows, annotations)
-    # convert to a big numpy array 
+    # convert to a big np array 
     if len(saccades) > 0:
         n = len(saccades)
         logger.info("Found %d saccades" % n)
-        saccades_array = numpy.ndarray(shape=(n,), dtype=saccade_dtype)
+        saccades_array = np.zeros(shape=(n,), dtype=saccade_dtype)
         for i in range(n):
+            check_saccade_is_well_formed(saccades[i])
             saccades_array[i] = saccades[i]
-        #saccades = numpy.concatenate(saccades[1:])
+            check_saccade_is_well_formed(saccades_array[i])
+        #saccades = np.concatenate(saccades[1:])
     else:
         logger.info("Warning: no saccades found.")
-        saccades_array = numpy.ndarray(dtype=saccade_dtype, shape=(0,))
+        saccades_array = np.zeros(dtype=saccade_dtype, shape=(0,))
         
     return saccades_array, annotated_rows
 

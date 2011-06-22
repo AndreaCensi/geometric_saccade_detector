@@ -1,4 +1,5 @@
 import numpy, scipy.signal
+from contracts.main import contract
 
 
 def merge_fields(a, b):
@@ -95,16 +96,17 @@ def normalize_180(d):
     return numpy.degrees(normalize_pi(numpy.radians(d)))
     
 
-
+@contract(x='array[K]', timestamp='array[K]', returns='array[K]')
 def compute_derivative(x, timestamp):
     dt = timestamp[1] - timestamp[0]
     deriv_filter = numpy.array([0.5, 0, -0.5] / dt)
-    d = scipy.signal.convolve(x, deriv_filter, mode=1) #@UndefinedVariable
+    if scipy.version.short_version == '0.8.0':
+        d = scipy.signal.convolve(x, deriv_filter, mode='same', old_behavior=True)
+    else:
+        d = scipy.signal.convolve(x, deriv_filter, mode=1)
     d[0] = d[1]
     d[-1] = d[-2]
     return d        
-
-
 
 # Taken from the numpy cookbook
 
@@ -151,7 +153,8 @@ def smooth1d(x, window_len=11, window='hanning'):
 
 
     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+        raise ValueError, ("Window is not one of 'flat', 'hanning', 'hamming',"
+                            "'bartlett', 'blackman'")
 
 
     s = numpy.r_[2 * x[0] - x[window_len:1:-1], x, 2 * x[-1] - x[-1:-window_len:-1]]

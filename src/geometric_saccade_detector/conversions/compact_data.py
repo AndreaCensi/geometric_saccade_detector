@@ -1,13 +1,18 @@
 import os, numpy, sys, pickle
 from optparse import OptionParser
 
-from .logger import logger
-from .filesystem_utils import locate
-from .io import saccades_read_h5, saccades_write_h5, saccades_write_mat
+from ..logger import logger
+from ..filesystem_utils import locate
+from ..io import saccades_read_h5, saccades_write_h5, saccades_write_mat
+
+description = """ 
+    Compacts the data in two files (posts and noposts).
+    Used in Fall 2010. 
+"""
 
 
 def main():
-    parser = OptionParser()
+    parser = OptionParser(usage=description)
 
     (options, args) = parser.parse_args() #@UnusedVariable
 

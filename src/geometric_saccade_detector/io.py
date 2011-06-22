@@ -18,6 +18,7 @@ def saccades_read_h5(filename):
     h5 = tables.openFile(filename, 'r')
     saccades = numpy.array(h5.root.saccades, dtype=h5.root.saccades.dtype)
     # TODO: check the dtype is the same
+    h5.close()
     return saccades
 
 def saccades_write_h5(filename, saccades):

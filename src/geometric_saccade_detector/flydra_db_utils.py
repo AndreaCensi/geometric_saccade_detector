@@ -1,7 +1,7 @@
 import numpy, os
 
-import flydra.a2.core_analysis as core_analysis
-from flydra.a2 import xml_stimulus
+import flydra.a2.core_analysis as core_analysis #@UnresolvedImport
+from flydra.a2 import xml_stimulus #@UnresolvedImport
 
 from .logger import logger
 from .structures import rows_dtype
@@ -23,7 +23,8 @@ def  consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml")
             return False, None, None
 
         ca = core_analysis.get_global_CachingAnalyzer()
-        (obj_ids, use_obj_ids, is_mat_file, data_file, extra) = ca.initial_file_load(h5file) #@UnusedVariable
+        (obj_ids, use_obj_ids, #@UnusedVariable
+         is_mat_file, data_file, extra) = ca.initial_file_load(h5file) #@UnusedVariable
 
         file_timestamp = timestamp_string_from_filename(h5file)
 
@@ -53,7 +54,8 @@ def  consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml")
         return False, None, None
     
         
-def get_good_files(where, pattern="*.kh5", fanout_template="fanout.xml", verbose=False, confirm_problems=False):
+def get_good_files(where, pattern="*.kh5", fanout_template="fanout.xml", 
+                   verbose=False, confirm_problems=False):
     """ Looks for .kh5 files in the filesystem. 
     
         @where can be either:
@@ -66,16 +68,18 @@ def get_good_files(where, pattern="*.kh5", fanout_template="fanout.xml", verbose
     
     all_files = locate_roots(pattern, where)
     
-    logger.info("Found %d  %s files in locations %s" % (len(all_files), pattern, str(where)))
+    logger.info("Found %d  %s files in locations %s" % 
+                (len(all_files), pattern, str(where)))
     
     good_files = []
 
     for filename in all_files:
-        well_formed, use_obj_ids, stim_xml = consider_stimulus(filename, fanout_name=fanout_template)
+        well_formed, use_obj_ids, stim_xml = \
+            consider_stimulus(filename, fanout_name=fanout_template)
 
         if not(well_formed):
             if confirm_problems:
-                logger.error("File %s not well described; skipping" % filename)
+                logger.error("File %r not well described; skipping" % filename)
                 raw_input("Are you aware of this?")
         else:
             good_files.append((filename, use_obj_ids, stim_xml))
