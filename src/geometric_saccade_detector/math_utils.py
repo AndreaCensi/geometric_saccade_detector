@@ -1,5 +1,5 @@
 import numpy, scipy.signal
-from contracts.main import contract
+from contracts import contract
 
 
 def merge_fields(a, b):

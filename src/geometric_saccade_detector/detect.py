@@ -2,7 +2,7 @@ import  os, numpy, sys, platform
 from datetime import datetime
 from optparse import OptionParser 
 
-from . import version # XXX: make this coherent
+from . import __version__  # XXX: make this coherent
 from .logger import logger
 from .debug_output import write_debug_output
 from .algorithm import geometric_saccade_detect
@@ -10,7 +10,7 @@ from .filesystem_utils import get_user
 from .io import saccades_write_all
 from .flydra_db_utils import get_good_smoothed_tracks, \
      get_good_files, timestamp_string_from_filename
-from geometric_saccade_detector.well_formed_saccade import check_saccade_is_well_formed
+from .well_formed_saccade import check_saccade_is_well_formed
 import flydra.a2.core_analysis as core_analysis #@UnresolvedImport
 import traceback
    
@@ -71,7 +71,7 @@ def main():
         
     # Create processed string
     processed = 'geometric_saccade_detector %s %s %s@%s Python %s' % \
-                (version, datetime.now().strftime("%Y%m%d_%H%M%S"),
+                (__version__, datetime.now().strftime("%Y%m%d_%H%M%S"),
                  get_user(), platform.node(), platform.python_version())
         
 
