@@ -2,29 +2,40 @@ import numpy, scipy.signal
 from contracts import contract
 
 
-def merge_fields(a, b):
+def merge_fields(a, b, ignore_duplicates=False):
     ''' Merge the fields of the two numpy arrays a,b. 
         They must have the same shape. '''
     if a.shape != b.shape:    
         raise ValueError('Arrays must have the same shape; '
                          'found %s and %s.' % (str(a.shape), str(b.shape)))
-        
+    all_fields = {}    
     new_dtype = []
     
     for f in a.dtype.fields:
+        all_fields[f] = a.dtype[f]
         new_dtype.append((f, a.dtype[f]))
+    
+    
     for f in b.dtype.fields:
-        new_dtype.append((f, b.dtype[f]))
+        if f in all_fields:
+            if ignore_duplicates:
+                continue
+            else:
+                msg = ('Field %r is in both datatypes.\n%r\n%r' % 
+                       (f, a.dtype, b.dtype))
+                raise ValueError(msg)
+        else:
+            new_dtype.append((f, b.dtype[f]))
         
     new_dtype = numpy.dtype(new_dtype)
 
     c = numpy.ndarray(shape=a.shape, dtype=new_dtype)
-    for f in a.dtype.fields:
-        # c[f] = a[f][:]   not working on pytables
-        c[f] = a[:][f]
     for f in b.dtype.fields:
         # c[f] = b[f][:]
         c[f] = b[:][f]
+    for f in a.dtype.fields:
+        # c[f] = a[f][:]   not working on pytables
+        c[f] = a[:][f]
     return c
 
 

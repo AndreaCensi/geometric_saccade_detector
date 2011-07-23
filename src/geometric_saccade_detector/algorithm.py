@@ -285,11 +285,11 @@ def geometric_saccade_detect(rows, params):
     # remove first saccade (cannot compute time_passed)
     saccades.pop(0)
     
-    annotated_rows = merge_fields(rows, annotations)
+    annotated_rows = merge_fields(rows, annotations,
+                                  ignore_duplicates=True)
     # convert to a big np array 
     if len(saccades) > 0:
         n = len(saccades)
-        logger.info("Found %d saccades" % n)
         saccades_array = np.zeros(shape=(n,), dtype=saccade_dtype)
         for i in range(n):
             check_saccade_is_well_formed(saccades[i])
@@ -297,7 +297,6 @@ def geometric_saccade_detect(rows, params):
             check_saccade_is_well_formed(saccades_array[i])
         #saccades = np.concatenate(saccades[1:])
     else:
-        logger.info("Warning: no saccades found.")
         saccades_array = np.zeros(dtype=saccade_dtype, shape=(0,))
         
     return saccades_array, annotated_rows
