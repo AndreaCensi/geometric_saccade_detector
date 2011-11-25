@@ -1,6 +1,6 @@
 import numpy, tables, os, scipy.io
 
-from .logger import logger
+from . import logger
 from .structures import saccade_dtype
 
 def saccades_write_all(basename, saccades):
@@ -28,8 +28,8 @@ def saccades_write_h5(filename, saccades):
     # to /flydra/samples/<SAMPLE>/saccades
     num_samples = len(numpy.unique(saccades[:]['sample']))
     if num_samples == 1:
-        id = saccades[0]['sample']
-        parent = '/flydra/samples/%s' % id
+        sid = saccades[0]['sample']
+        parent = '/flydra/samples/%s' % sid
         name = 'saccades'
         target = table 
         h5file.createHardLink(where=parent, name=name, target=target,

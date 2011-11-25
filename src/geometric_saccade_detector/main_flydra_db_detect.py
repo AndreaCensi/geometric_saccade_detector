@@ -1,24 +1,23 @@
-from . import __version__ 
+from . import __version__, logger, np
 from .algorithm import geometric_saccade_detect
 from .debug_output import write_debug_output
-from .filesystem_utils import get_user
-from .logger import logger
+from .utils import (LenientOptionParser, wrap_script_entry_point,
+    get_computed_string)
 from .well_formed_saccade import check_saccade_is_well_formed
-from datetime import datetime
 from flydra_db import safe_flydra_db_open
-from optparse import OptionParser
 import os
-import numpy as np
-import sys
-import platform
-import traceback
+import warnings
 
-   
+usage = """
 
-def main():
+    %cmd  --db <flydra_db> --version row_version
+
+"""
+
+def flydra_db_detect(args):
     np.seterr(all='raise')
                  
-    parser = OptionParser()
+    parser = LenientOptionParser(usage=usage)
 
     parser.add_option("--db", help="FlydraDB directory.")
 
@@ -33,6 +32,7 @@ def main():
 
     # detection parameters
     dt = 1.0 / 60 # XXX: read from file
+    warnings.warn('Using fixed dt = %s.' % dt)
     parser.add_option("--deltaT_inner_sec", default=4 * dt, type='float',
                       help="Inner interval [= %default]")
     parser.add_option("--deltaT_outer_sec", default=10 * dt, type='float',
@@ -50,20 +50,18 @@ def main():
     parser.add_option("--minimum_interval_sec", default=10 * dt, type='float',
                       help="Minimum interval between saccades. [= %default]")
     
-    (options, args) = parser.parse_args()
+    (options, args) = parser.parse_args(args)
     
     if not options.db:
-        logger.error('No flydra DB directory  specified.')
-        sys.exit(-1)
+        raise Exception('No flydra DB directory  specified.')
     
     if args:
-        logger.error('Spurious arguments')
-        sys.exit(-2)
+        raise Exception('Spurious arguments')
+    
         
     # Create processed string
-    processed = 'geometric_saccade_detector %s %s %s@%s Python %s' % \
-                (__version__, datetime.now().strftime("%Y%m%d_%H%M%S"),
-                 get_user(), platform.node(), platform.python_version())
+    processed = get_computed_string('geometric_saccade_detector', __version__)
+
         
     rows_table_name = 'rows'
     rows_table_version = options.version
@@ -94,11 +92,11 @@ def main():
                                    rows_table_version) as rows:
                  
                 params = {
-                  'deltaT_inner_sec': options.deltaT_inner_sec   ,
-                  'deltaT_outer_sec':  options. deltaT_outer_sec  ,
-                  'min_amplitude_deg':  options.min_amplitude_deg   ,
+                  'deltaT_inner_sec': options.deltaT_inner_sec,
+                  'deltaT_outer_sec':  options. deltaT_outer_sec,
+                  'min_amplitude_deg':  options.min_amplitude_deg,
                   'max_orientation_dispersion_deg': 
-                    options.max_orientation_dispersion_deg   ,
+                    options.max_orientation_dispersion_deg,
                   'minimum_interval_sec':  options.minimum_interval_sec,
                   'max_linear_acceleration':  options.max_linear_acceleration,
                   'min_linear_velocity': options.min_linear_velocity,
@@ -143,14 +141,13 @@ def main():
                                    annotated, saccades)
 
 
+def main():
+    wrap_script_entry_point(flydra_db_detect, logger)
+
 
 if __name__ == '__main__':
-    try:
-        main()
-        sys.exit(0)      
-    except Exception as e:
-        logger.error(str(e))
-        logger.error(traceback.format_exc())
-        sys.exit(-2)      
+    main()
         
+
+
 

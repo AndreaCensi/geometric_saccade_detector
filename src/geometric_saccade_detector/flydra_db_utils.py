@@ -3,23 +3,27 @@ import numpy, os
 import flydra.a2.core_analysis as core_analysis #@UnresolvedImport
 from flydra.a2 import xml_stimulus #@UnresolvedImport
 
-from .logger import logger
+from . import logger
 from .structures import rows_dtype
-from .filesystem_utils import locate_roots
+from .utils import locate_roots
 
 warned_fixed_dt = False
 
 def consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml"):
-    """ Parses the corresponding fanout XML and finds IDs to use as well as the stimulus.
+    """ 
+        Parses the corresponding fanout XML and finds IDs to use as well 
+        as the stimulus.
         Returns 3 values: valid, use_objs_ids, stimulus.  
-        valid is false if something was wrong"""
+        valid is false if something was wrong
+    """
    
     try:
-        dir = os.path.dirname(h5file)
-        fanout_xml = os.path.join(dir, fanout_name)
+        dirname = os.path.dirname(h5file)
+        fanout_xml = os.path.join(dirname, fanout_name)
         if not(os.path.exists(fanout_xml)):
             if verbose_problems:
-                logger.error("Stim_xml path not found '%s' for file '%s'" % (h5file, fanout_xml))
+                logger.error("Stim_xml path not found '%s' for file '%s'" % 
+                             (h5file, fanout_xml))
             return False, None, None
 
         ca = core_analysis.get_global_CachingAnalyzer()
@@ -29,7 +33,8 @@ def consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml"):
         file_timestamp = timestamp_string_from_filename(h5file)
 
         fanout = xml_stimulus.xml_fanout_from_filename(fanout_xml)
-        include_obj_ids, exclude_obj_ids = fanout.get_obj_ids_for_timestamp(timestamp_string=file_timestamp)
+        include_obj_ids, exclude_obj_ids = \
+        fanout.get_obj_ids_for_timestamp(timestamp_string=file_timestamp)
         if include_obj_ids is not None:
             use_obj_ids = include_obj_ids
         if exclude_obj_ids is not None:
@@ -63,12 +68,14 @@ def get_good_files(where, pattern="*.kh5", fanout_template="fanout.xml",
         2) a directory name
         3) a list with files and directory names
     
-        Returns an array of tuples   (filename, obj_ids, stimulus)  for the valid files
+        Returns an array of tuples   (filename, obj_ids, stimulus)  
+        for the valid files
     """
     
     all_files = locate_roots(pattern, where)
     
-    logger.info("Found %d  %s files in locations %s" % 
+    if verbose:
+        logger.info("Found %d  %s files in locations %s" % 
                 (len(all_files), pattern, str(where)))
     
     good_files = []
@@ -85,7 +92,9 @@ def get_good_files(where, pattern="*.kh5", fanout_template="fanout.xml",
             good_files.append((filename, use_obj_ids, stim_xml))
 
 
-    logger.info("Of these, %d have entries in fanout.xml" % (len(good_files),))
+    if verbose:
+        logger.info("Of these, %d have entries in fanout.xml" % 
+                    (len(good_files),))
     
     return good_files
 
@@ -147,7 +156,9 @@ def get_good_smoothed_tracks(filename, obj_ids,
 
             # return raw data if smoothing is not requested
             if not use_smoothing:
-                yield obj_id, extract_interesting_fields(frows, numpy.dtype(rows_dtype))
+                yield (obj_id,
+                       extract_interesting_fields(frows,
+                                                  numpy.dtype(rows_dtype)))
                 continue
 
             # otherwise, run the smoothing
@@ -176,7 +187,7 @@ def get_good_smoothed_tracks(filename, obj_ids,
             # quick fix
             if dynamic_model_name == "mamarama, units: mm" and not warned:
                 warned = True
-                logger.info("Warning: Implementing simple workaround for flydra's " \
+                logger.info("Warning: Implementing simple workaround for flydra's " 
                       "units inconsistencies (multiplying xvel,yvel by 1000).")
                 srows['xvel'] *= 1000
                 srows['yvel'] *= 1000

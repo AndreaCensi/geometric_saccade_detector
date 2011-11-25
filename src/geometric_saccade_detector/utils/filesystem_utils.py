@@ -1,6 +1,6 @@
 ''' Utils to look for files in the filesystem respecting certain patterns. '''
 
-import os, fnmatch, pwd
+import os, fnmatch
 
 
 def locate(pattern, root):
@@ -25,10 +25,4 @@ def locate_roots(pattern, where):
             all_files.extend(set(locate(pattern=pattern, root=w)))
 
     return all_files
-
-def get_user():    
-        try:
-            return pwd.getpwuid(os.getuid())[0]
-        except:
-            return '<unknown user>'
-    
+ 

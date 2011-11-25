@@ -1,8 +1,8 @@
 import os, sys 
 from optparse import OptionParser
 
-from ..logger import logger
-from ..filesystem_utils import locate
+from .. import logger
+from ..utils import locate
 from ..io import saccades_read_h5 
 import traceback
 import flydra_db
@@ -65,10 +65,11 @@ def main():
         
         
         with flydra_db.safe_flydra_db_open(options.db, create=True) as db:
-            for i, file in enumerate(files):
-                saccades = saccades_read_h5(file)
+            for i, filename in enumerate(files):
+                saccades = saccades_read_h5(filename)
                 saccades['sample_num'] = i
-                logger.debug('Sample %s: %d saccades.' % (file, len(saccades)))
+                logger.debug('Sample %s: %d saccades.' % 
+                             (filename, len(saccades)))
                 store_sample_in_flydra_db(saccades, db)
 
     

@@ -1,4 +1,5 @@
-import os, math, numpy
+import os, math
+import numpy as  np
 
 from matplotlib import pylab 
 
@@ -34,13 +35,13 @@ def plot_saccades(rows, saccades):
         y = rows['y'][k]
         
         L = 0.03
-        orientation_start = numpy.radians(saccades[i]['orientation_start'])
-        orientation_stop = numpy.radians(saccades[i]['orientation_stop'])
+        orientation_start = np.radians(saccades[i]['orientation_start'])
+        orientation_stop = np.radians(saccades[i]['orientation_stop'])
         
-        x1 = x + L * numpy.cos(orientation_stop)
-        y1 = y + L * numpy.sin(orientation_stop)
-        x2 = x - L * numpy.cos(orientation_start)
-        y2 = y - L * numpy.sin(orientation_start)
+        x1 = x + L * np.cos(orientation_stop)
+        y1 = y + L * np.sin(orientation_stop)
+        x2 = x - L * np.cos(orientation_start)
+        y2 = y - L * np.sin(orientation_start)
         
         pylab.plot([x, x1], [y, y1], 'r-')
         pylab.plot([x, x2], [y, y2], 'g-')
@@ -69,7 +70,7 @@ def create_pictures(rows, saccades, outdir, basename):
     pylab.savefig(os.path.join(outdir, fignames[-1]))
     pylab.close()
     
-    candidates, = numpy.nonzero(rows['candidate'])
+    candidates, = np.nonzero(rows['candidate'])
     
     fignames.append(basename + '-candidates.png')
     pylab.figure()
@@ -101,7 +102,7 @@ def create_pictures(rows, saccades, outdir, basename):
 
     fignames.append(basename + '-angular_velocity_modulus.png')
     pylab.figure()
-    pylab.plot(T, numpy.degrees(rows['angular_velocity_modulus']), '.')
+    pylab.plot(T, np.degrees(rows['angular_velocity_modulus']), '.')
     pylab.title('angular velocity modulus')
     pylab.ylabel('deg/s')
     mark_saccades(rows, saccades)
@@ -113,7 +114,7 @@ def create_pictures(rows, saccades, outdir, basename):
 
     fignames.append(basename + '-amplitude.png')
     pylab.figure()
-    pylab.plot(T, numpy.degrees(rows['amplitude']), '.')
+    pylab.plot(T, np.degrees(rows['amplitude']), '.')
     pylab.title('amplitude (deg)')
     mark_saccades(rows, saccades)
     pylab.savefig(os.path.join(outdir, fignames[-1]))
@@ -121,7 +122,7 @@ def create_pictures(rows, saccades, outdir, basename):
 
     fignames.append(basename + '-before_dispersion.png')
     pylab.figure()
-    pylab.plot(T, numpy.degrees(rows['before_dispersion']), '.')
+    pylab.plot(T, np.degrees(rows['before_dispersion']), '.')
     pylab.title('before_dispersion (deg)')
     mark_saccades(rows, saccades)
     pylab.savefig(os.path.join(outdir, fignames[-1]))
@@ -129,7 +130,7 @@ def create_pictures(rows, saccades, outdir, basename):
 
     fignames.append(basename + '-after_dispersion.png')
     pylab.figure()
-    pylab.plot(T, numpy.degrees(rows['after_dispersion']), '.')
+    pylab.plot(T, np.degrees(rows['after_dispersion']), '.')
     pylab.title('after_dispersion (deg)')
     mark_saccades(rows, saccades)
     pylab.savefig(os.path.join(outdir, fignames[-1]))
@@ -184,8 +185,8 @@ img { width: 40%%; }
     
     # iterate over each obj_id
     obj_ids = all_data['obj_id']
-    for obj_id in  numpy.unique(obj_ids):
-        indices_for_obj_id, = numpy.nonzero(obj_ids == obj_id) 
+    for obj_id in  np.unique(obj_ids):
+        indices_for_obj_id, = np.nonzero(obj_ids == obj_id) 
         rows = all_data[indices_for_obj_id]
         
         num_pictures = int(math. ceil(len(rows) / max_rows_per_picture))

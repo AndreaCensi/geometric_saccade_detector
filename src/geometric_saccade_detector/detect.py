@@ -1,18 +1,20 @@
-import  os, numpy, sys, platform
-from datetime import datetime
-from optparse import OptionParser 
-
-from . import __version__  # XXX: make this coherent
-from .logger import logger
-from .debug_output import write_debug_output
+from . import logger, __version__ # XXX: make this coherent
 from .algorithm import geometric_saccade_detect
-from .filesystem_utils import get_user
+from .debug_output import write_debug_output
+from .flydra_db_utils import (get_good_smoothed_tracks, get_good_files,
+    timestamp_string_from_filename)
 from .io import saccades_write_all
-from .flydra_db_utils import get_good_smoothed_tracks, \
-     get_good_files, timestamp_string_from_filename
+from .utils import get_user
 from .well_formed_saccade import check_saccade_is_well_formed
-import flydra.a2.core_analysis as core_analysis #@UnresolvedImport
+from datetime import datetime
+from optparse import OptionParser
+import os
+import numpy
+import sys
+import platform
 import traceback
+
+import flydra.a2.core_analysis as core_analysis #@UnresolvedImport
    
 
 def main():

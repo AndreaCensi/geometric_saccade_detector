@@ -76,4 +76,12 @@ annotation_dtype = [
     ('candidate', 'uint8'),
 ]
 
+UNKNOWN = '?'
 
+
+def saccade_description(saccade):
+    s = 'Saccade structure:'
+    for field, _ in saccade_dtype:
+        s += '\n  %30s : %s ' % (field, saccade[field])
+    return s
+    

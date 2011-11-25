@@ -1,14 +1,12 @@
-import numpy as np
+from . import (check_saccade_is_well_formed, merge_fields, compute_derivative,
+    find_indices_in_bounds, get_orientation_and_dispersion, normalize_pi, smooth1d,
+    normalize_180, saccade_dtype, annotation_dtype, np)
+from geometric_saccade_detector.structures import saccade_description
 
-from .logger import logger
-from .structures import saccade_dtype, annotation_dtype
-from .math_utils import merge_fields, compute_derivative, find_indices_in_bounds, \
-    get_orientation_and_dispersion, normalize_pi, smooth1d, normalize_180
-                   
-from .well_formed_saccade import check_saccade_is_well_formed
-                                 
+                                                    
 def geometric_saccade_detect(rows, params):
-    ''' Detects saccades in a log fragment. 
+    ''' 
+        Detects saccades in a log fragment. 
     
         Rows is a np array with at least the fields
             timestamp, obj_id, x, y, xvel, yvel.
@@ -45,7 +43,7 @@ def geometric_saccade_detect(rows, params):
     required_fields = ['obj_id', 'frame', 'timestamp', 'x', 'y', 'xvel', 'yvel']
     for field in required_fields:
         if not field in rows.dtype.fields:
-            raise ValueError('Cannot find required field "%s" in dtype %s' % \
+            raise ValueError('Cannot find required field "%s" in dtype %s' % 
                              (field, rows.dtype))
         values = rows[field]
         num_nan = np.isnan(values).sum()
@@ -60,8 +58,7 @@ def geometric_saccade_detect(rows, params):
     # (we allow "missing" parts from the data, but it should be
     #  at most a few seconds)
     timestamp = rows['timestamp']
-    obj_id = rows['obj_id']
-    #frame = rows['frame']
+    obj_id = rows['obj_id'] 
     
     # check each consecutive pair of rows that have the same obj_id
     for i in range(len(rows) - 1):
@@ -69,14 +66,14 @@ def geometric_saccade_detect(rows, params):
             continue
         
         if not timestamp[i] < timestamp[i + 1]:
-            raise ValueError('Invalid timestamp sequence %.3f %.3f at index %d/%d: ' % \
-                             (timestamp[i], timestamp[i + 1], i, len(timestamp)) + \
+            raise ValueError('Invalid timestamp sequence %.3f %.3f at index %d/%d: ' % 
+                             (timestamp[i], timestamp[i + 1], i, len(timestamp)) + 
                              str(rows[i]), str(rows[i + 1]))
         dt = timestamp[i + 1] - timestamp[i]
         # print dt, 'fps', int(1 / dt)
         maximum_dt_allowed = 60
         if dt > maximum_dt_allowed:
-            raise ValueError('Detected dt %.3f > %.3f at index %d/%d' % \
+            raise ValueError('Detected dt %.3f > %.3f at index %d/%d' % 
                              (dt, maximum_dt_allowed, i, len(rows)))
       
     
@@ -168,14 +165,15 @@ def geometric_saccade_detect(rows, params):
         turning_angle = normalize_pi(orientation_stop - orientation_start) 
         amplitude = abs(turning_angle)
         
-        candidate = \
-            (before_dispersion <= np.radians(max_orientation_dispersion_deg)) and \
-            (after_dispersion <= np.radians(max_orientation_dispersion_deg)) and \
-            (amplitude >= np.radians(min_amplitude_deg)) and \
-            (annotations['linear_velocity_modulus'][i] >= min_linear_velocity) and \
-            (annotations['linear_acceleration_modulus'][i] <= max_linear_acceleration) and \
+        candidate = (
+            (before_dispersion <= np.radians(max_orientation_dispersion_deg)) and 
+            (after_dispersion <= np.radians(max_orientation_dispersion_deg)) and 
+            (amplitude >= np.radians(min_amplitude_deg)) and 
+            (annotations['linear_velocity_modulus'][i] >= min_linear_velocity) and 
+            (annotations['linear_acceleration_modulus'][i] <= max_linear_acceleration) and 
             (annotations['angular_velocity_modulus'][i] <= np.radians(max_angular_velocity)) and \
             (annotations['angular_velocity_modulus'][i] >= np.radians(100)) 
+        )
 
         preference = amplitude - 0.5 * before_dispersion - 0.5 * after_dispersion
 
@@ -221,12 +219,6 @@ def geometric_saccade_detect(rows, params):
         
         # print "found saccade at %d, time %.2f" % (i, timestamp[i] - timestamp[0])
         
-#        from_index = i - annotations['num_samples_used_before'][i]
-#        to_index = i + annotations['num_samples_used_after'][i]
-#        from_index = i - 1
-#        to_index = i + 1
-#        top_velocity = \
-#            annotations['angular_velocity_modulus'][from_index:(to_index + 1)].max()
         top_velocity = annotations['angular_velocity_modulus'][i]
        
         duration = annotations['amplitude'][i] / top_velocity
@@ -265,6 +257,21 @@ def geometric_saccade_detect(rows, params):
         
         annotations['marked_as_used'][nearby_indices] += 1
     
+  
+    saccades_array = saccade_list_to_array(saccades)
+    annotated_rows = merge_fields(rows, annotations,
+                                  ignore_duplicates=True)
+
+    return saccades_array, annotated_rows
+ 
+
+def saccade_list_to_array(saccades):
+    ''' Converts an array of saccades to a big array.
+        It computes time_passed, smooth_displacement, discards first saccade. '''
+    
+    if len(saccades) == 0:
+        return np.zeros(dtype=saccade_dtype, shape=(0,))
+    
     # sort the saccades chronologically
     saccades.sort(key=lambda x:x['time_start'])
     
@@ -274,9 +281,14 @@ def geometric_saccade_detect(rows, params):
         
     # now compute time_passed; discarding one first saccade
     for i in range(1, len(saccades)):
-        saccades[i]['time_passed'] = \
-            saccades[i]['time_start'] - saccades[i - 1]['time_start']
-        assert saccades[i]['time_passed'] > 0  
+        time_passed = saccades[i]['time_start'] - saccades[i - 1]['time_start']
+        if time_passed <= 0:
+            msg = ('Invalid value of time_passed computed.\n%s\n%s' 
+                   % (saccade_description(saccades[i - 1]),
+                      saccade_description(saccades[i])))
+            
+            raise Exception(msg)
+        saccades[i]['time_passed'] = time_passed
         saccades[i]['smooth_displacement'] = \
             normalize_180(saccades[i]['orientation_start'] - 
                           saccades[i - 1]['orientation_stop'])
@@ -285,8 +297,6 @@ def geometric_saccade_detect(rows, params):
     # remove first saccade (cannot compute time_passed)
     saccades.pop(0)
     
-    annotated_rows = merge_fields(rows, annotations,
-                                  ignore_duplicates=True)
     # convert to a big np array 
     if len(saccades) > 0:
         n = len(saccades)
@@ -295,10 +305,7 @@ def geometric_saccade_detect(rows, params):
             check_saccade_is_well_formed(saccades[i])
             saccades_array[i] = saccades[i]
             check_saccade_is_well_formed(saccades_array[i])
-        #saccades = np.concatenate(saccades[1:])
     else:
         saccades_array = np.zeros(dtype=saccade_dtype, shape=(0,))
-        
-    return saccades_array, annotated_rows
 
-    
+    return saccades_array

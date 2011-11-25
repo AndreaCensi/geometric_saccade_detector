@@ -1,8 +1,8 @@
 import os, numpy, sys, pickle
 from optparse import OptionParser
 
-from ..logger import logger
-from ..filesystem_utils import locate
+from .. import logger
+from ..utils import locate
 from ..io import saccades_read_h5, saccades_write_h5, saccades_write_mat
 
 description = """ 
@@ -30,13 +30,13 @@ def main():
     files = sorted(list(locate(pattern=pattern, root=directory)))
     
     if not files:
-        raise Exception('No files with pattern %s found in directory %s ' % \
+        raise Exception('No files with pattern %s found in directory %s ' % 
                         (pattern, directory))
         
     all_data = []
-    for i, file in enumerate(files):
-        logger.info('Reading file %s' % file)
-        saccades = saccades_read_h5(file)
+    for i, filename in enumerate(files):
+        logger.info('Reading file %s' % filename)
+        saccades = saccades_read_h5(filename)
         saccades['sample_num'] = i
         all_data.append(saccades)
         
