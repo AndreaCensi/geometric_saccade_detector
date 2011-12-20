@@ -1,9 +1,9 @@
-import os, math
-import numpy as  np
-
-from matplotlib import pylab 
-
 from .math_utils import find_closest_index
+from matplotlib import pylab
+import os
+import math
+from . import np
+
 
 def mark_saccades(rows, saccades):
     a = pylab.axis()
@@ -21,6 +21,7 @@ def mark_saccades(rows, saccades):
         pylab.plot([n_middle, n_middle], [a[2], a[3]], 'r-')
         #pylab.plot([n_stop, n_stop], [a[2], a[3]], 'b-')
         pylab.text(n_middle, a[3], "%d" % i)
+        
         
 def plot_saccades(rows, saccades):
     timestamp = rows['timestamp']
@@ -48,7 +49,6 @@ def plot_saccades(rows, saccades):
         pylab.plot(x, y, 'rx')
         
         pylab.text(x, y, "%d" % i)
-        
          
 
 def create_pictures(rows, saccades, outdir, basename):
@@ -99,7 +99,6 @@ def create_pictures(rows, saccades, outdir, basename):
     pylab.savefig(os.path.join(outdir, fignames[-1]))
     pylab.close()
 
-
     fignames.append(basename + '-angular_velocity_modulus.png')
     pylab.figure()
     pylab.plot(T, np.degrees(rows['angular_velocity_modulus']), '.')
@@ -110,7 +109,6 @@ def create_pictures(rows, saccades, outdir, basename):
     pylab.axis([a[0], a[1], 0, 6000])
     pylab.savefig(os.path.join(outdir, fignames[-1]))
     pylab.close()
-
 
     fignames.append(basename + '-amplitude.png')
     pylab.figure()
@@ -155,7 +153,6 @@ def create_pictures(rows, saccades, outdir, basename):
     pylab.savefig(os.path.join(outdir, fignames[-1]))
     pylab.close()
 
-
     return fignames
 
 
@@ -199,7 +196,6 @@ img { width: 40%%; }
             write_saccade_info_table(f, saccades,
                          t0=rows_for_this_picture[0]['timestamp'],
                          t1=rows_for_this_picture[-1]['timestamp'])
-
             
             basename = 'objid%s-%s-%s' % (obj_id, from_index, to_index)             
             pictures = create_pictures(rows_for_this_picture, saccades,
@@ -210,7 +206,6 @@ img { width: 40%%; }
             for picture in pictures:
                 f.write("<img src='%s'/>" % picture)
                         
-    
             f.write('</div>')
 
     f.write('''
@@ -248,7 +243,8 @@ def write_saccade_info_table(f, saccades, t0, t1):
         f.write(' <td>%.3f</td>\n' % saccades[i]['top_velocity'])
         f.write(' <td>%d</td>\n' % saccades[i]['sign'])
         f.write(' <td>%.2f</td>\n' % saccades[i]['linear_velocity_modulus'])
-        f.write(' <td>%.2f</td>\n' % saccades[i]['linear_acceleration_modulus'])
+        f.write(' <td>%.2f</td>\n' % 
+                 saccades[i]['linear_acceleration_modulus'])
         f.write(' <td>%d, %d</td>\n' % (saccades[i]['orientation_start'],
                                     saccades[i]['orientation_stop']))
         f.write(' <td>%d,%d</td>\n' % (

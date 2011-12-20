@@ -4,8 +4,10 @@ __version__ = '1.1'
 import sys
 import traceback
 
+
 class UserError(Exception):
     pass
+
 
 def wrap_script_entry_point(function, logger):
     try:
@@ -24,6 +26,7 @@ def check_mandatory(options, mandatory):
         if options.__dict__[m] is None:
             msg = 'Mandatory option %r not passed.' % m
             raise UserError(msg)
+
 
 def check_no_spurious(args):
     if args:

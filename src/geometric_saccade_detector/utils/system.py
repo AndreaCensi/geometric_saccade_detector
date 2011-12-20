@@ -3,6 +3,7 @@ import pwd
 import os
 import platform
 
+
 def get_user():    
     try:
         return pwd.getpwuid(os.getuid())[0]

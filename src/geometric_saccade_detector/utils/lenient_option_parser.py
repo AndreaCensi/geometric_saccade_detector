@@ -4,6 +4,7 @@ import optparse
 from optparse import IndentedHelpFormatter
 from . import UserError
 
+
 class LenientOptionParser(optparse.OptionParser):
     
     def __init__(self, prog=None, usage=None):

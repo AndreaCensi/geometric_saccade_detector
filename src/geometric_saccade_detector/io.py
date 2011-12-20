@@ -1,7 +1,9 @@
-import numpy, tables, os, scipy.io
-
-from . import logger
+from . import logger, np
 from .structures import saccade_dtype
+import tables
+import os
+import scipy.io
+
 
 def saccades_write_all(basename, saccades):
     ''' Writes in all the output types we know. ``basename`` is
@@ -13,20 +15,22 @@ def saccades_write_all(basename, saccades):
         os.makedirs(dirname)
     saccades_write_h5(basename + '.h5', saccades)
     saccades_write_mat(basename + '.mat', saccades)
+
     
 def saccades_read_h5(filename):
     h5 = tables.openFile(filename, 'r')
-    saccades = numpy.array(h5.root.saccades, dtype=h5.root.saccades.dtype)
+    saccades = np.array(h5.root.saccades, dtype=h5.root.saccades.dtype)
     # TODO: check the dtype is the same
     h5.close()
     return saccades
+
 
 def saccades_write_h5(filename, saccades):
     h5file = tables.openFile(filename, mode="w")
     table = h5file.createTable('/', 'saccades', saccades)
     # if there is only one sample, then add a symbolic link 
     # to /flydra/samples/<SAMPLE>/saccades
-    num_samples = len(numpy.unique(saccades[:]['sample']))
+    num_samples = len(np.unique(saccades[:]['sample']))
     if num_samples == 1:
         sid = saccades[0]['sample']
         parent = '/flydra/samples/%s' % sid
@@ -36,9 +40,10 @@ def saccades_write_h5(filename, saccades):
                               createparents=True)
     
     h5file.close()
+
     
 def saccades_write_mat(filename, saccades):
-    scipy.io.savemat(filename, {'saccades':saccades}, oned_as='column')
+    scipy.io.savemat(filename, {'saccades': saccades}, oned_as='column')
     
     
 def saccades_read_mat(filename):
@@ -55,8 +60,8 @@ def saccades_read_mat(filename):
     
     for field in ['time_passed']:
         x = saccades[field]
-        ok = numpy.isfinite(x)
-        bad, = numpy.nonzero(numpy.logical_not(ok))
+        ok = np.isfinite(x)
+        bad, = np.nonzero(np.logical_not(ok))
         if len(bad):
             print 'Fixing %d/%d non finite data in %s in %s' % \
                 (len(bad), len(saccades), field, filename)
@@ -64,13 +69,14 @@ def saccades_read_mat(filename):
             
     return saccades
 
+
 def enforce_saccade_dtype(data):
-    saccades = numpy.zeros(shape=(len(data),), dtype=saccade_dtype)
+    saccades = np.zeros(shape=(len(data),), dtype=saccade_dtype)
     
     for field in saccades.dtype.fields:
         if not field in data.dtype.fields:
             logger.warning('Matlab data does not have field "%s".' % field)
-            # saccades[field] = numpy.NaN
+            # saccades[field] = np.NaN
         else:
             # This does not work between |O4 and strings
             # saccades[field] = data[field]
@@ -80,7 +86,8 @@ def enforce_saccade_dtype(data):
     more = [field for field in data.dtype.fields 
                 if not field in saccades.dtype.fields]
     if more:
-        logger.warning('Data has more fields (%s) than expected.' % ", ".join(more))
+        logger.warning('Data has more fields (%s) than expected.' 
+                       % ", ".join(more))
             
     return saccades
     

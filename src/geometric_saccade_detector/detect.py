@@ -1,4 +1,4 @@
-from . import logger, __version__ # XXX: make this coherent
+from . import logger, __version__, np  # XXX: make this coherent
 from .algorithm import geometric_saccade_detect
 from .debug_output import write_debug_output
 from .flydra_db_utils import (get_good_smoothed_tracks, get_good_files,
@@ -9,16 +9,15 @@ from .well_formed_saccade import check_saccade_is_well_formed
 from datetime import datetime
 from optparse import OptionParser
 import os
-import numpy
 import sys
 import platform
 import traceback
 
-import flydra.a2.core_analysis as core_analysis #@UnresolvedImport
+import flydra.a2.core_analysis as core_analysis  # @UnresolvedImport
    
 
 def main():
-    numpy.seterr(all='raise')
+    np.seterr(all='raise')
                  
     parser = OptionParser()
 
@@ -55,12 +54,16 @@ def main():
     parser.add_option("--min_amplitude_deg", default=25, type='float',
                       help="Minimum saccade amplitude (deg) [= %default]")
     parser.add_option("--min_linear_velocity", default=0.1, type='float',
-                      help="Minimum linear velocity when saccading (m/s) [= %default]")
+                      help="Minimum linear velocity when saccading (m/s) "
+                            "[= %default]")
     parser.add_option("--max_linear_acceleration", default=20, type='float',
-                      help="Maximum linear acceleration when saccading (m/s^2) [= %default]")
+                      help="Maximum linear acceleration when saccading "
+                      "(m/s^2) [= %default]")
     parser.add_option("--max_angular_velocity", default=8000, type='float',
-                      help="Maximum angular velocity when saccading (deg/s) [= %default]")
-    parser.add_option("--max_orientation_dispersion_deg", default=15, type='float',
+                      help="Maximum angular velocity when saccading (deg/s) "
+                      "[= %default]")
+    parser.add_option("--max_orientation_dispersion_deg", default=15,
+                      type='float',
                       help="Maximum dispersion (deg) [= %default]")
     parser.add_option("--minimum_interval_sec", default=10 * dt, type='float',
                       help="Minimum interval between saccades. [= %default]")
@@ -76,10 +79,8 @@ def main():
                 (__version__, datetime.now().strftime("%Y%m%d_%H%M%S"),
                  get_user(), platform.node(), platform.python_version())
         
-
     if not os.path.exists(options.output_dir):
         os.makedirs(options.output_dir)
-
 
     good_files = get_good_files(where=args, pattern="*.kh5",
                                 confirm_problems=options.confirm_problems)
@@ -96,20 +97,23 @@ def main():
             stim_fname = os.path.splitext(os.path.basename(stim_fname))[0]
             basename = os.path.splitext(os.path.basename(filename))[0]
             
-            output_basename = os.path.join(options.output_dir, basename + '-saccades')        
+            output_basename = os.path.join(options.output_dir,
+                                           basename + '-saccades')        
             output_saccades_hdf = output_basename + '.h5'
                 
             if os.path.exists(output_saccades_hdf) and not options.nocache:
-                logger.info('File %r exists; skipping. (use --nocache to ignore)' % \
+                logger.info('File %r exists; skipping. '
+                            '(use --nocache to ignore)' % 
                                  output_saccades_hdf)
                 continue
             
-            logger.info("File %d/%d %s %s %s " % (i, n, str(filename), str(obj_ids), stim_fname))
+            logger.info("File %d/%d %s %s %s " % 
+                        (i, n, str(filename), str(obj_ids), stim_fname))
             
             # concatenate all in one track
             all_data = None
     
-            for obj_id, rows in get_good_smoothed_tracks(#@UnusedVariable
+            for _, rows in get_good_smoothed_tracks(
                     filename=filename,
                     obj_ids=obj_ids,
                     min_frames_per_track=options.min_frames_per_track,
@@ -117,33 +121,37 @@ def main():
                     use_smoothing=options.smoothing):
     
                 all_data = rows.copy() if all_data is None \
-                            else numpy.concatenate((all_data, rows))                
+                            else np.concatenate((all_data, rows))                
             
             if all_data is None:
-                logger.info('Not enough data found for %s; skipping.' % filename)
+                logger.info('Not enough data found for %s; skipping.' % 
+                            filename)
                 continue
             
             params = {
-              'deltaT_inner_sec': options.deltaT_inner_sec   ,
-              'deltaT_outer_sec':  options. deltaT_outer_sec  ,
-              'min_amplitude_deg':  options.min_amplitude_deg   ,
-              'max_orientation_dispersion_deg': options.max_orientation_dispersion_deg   ,
-              'minimum_interval_sec':  options.minimum_interval_sec,
-              'max_linear_acceleration':  options.max_linear_acceleration,
+              'deltaT_inner_sec': options.deltaT_inner_sec,
+              'deltaT_outer_sec': options. deltaT_outer_sec,
+              'min_amplitude_deg': options.min_amplitude_deg,
+              'max_orientation_dispersion_deg': 
+                        options.max_orientation_dispersion_deg,
+              'minimum_interval_sec': options.minimum_interval_sec,
+              'max_linear_acceleration': options.max_linear_acceleration,
               'min_linear_velocity': options.min_linear_velocity,
               'max_angular_velocity': options.max_angular_velocity,
             }
-            saccades, annotated_data = geometric_saccade_detect(all_data, params)
+            saccades, annotated_data = geometric_saccade_detect(all_data,
+                                                                params)
     
             for saccade in saccades:
                 check_saccade_is_well_formed(saccade)
                 
-            # other fields used for managing different samples, used in the analysis
+            # other fields used for managing different samples, 
+            # used in the analysis
             saccades['species'] = 'Dmelanogaster'
             saccades['stimulus'] = stim_fname
             sample_name = 'DATA' + timestamp_string_from_filename(filename)
             saccades['sample'] = sample_name
-            saccades['sample_num'] = -1 # will be filled in by someone else
+            saccades['sample_num'] = -1  # will be filled in by someone else
             saccades['processed'] = processed    
         
             logger.info("Writing to %s {h5,mat,pickle}" % output_basename)
@@ -167,9 +175,7 @@ def main():
         ca = core_analysis.get_global_CachingAnalyzer()
         ca.close()
         
-
     sys.exit(0)
-
 
 
 if __name__ == '__main__':

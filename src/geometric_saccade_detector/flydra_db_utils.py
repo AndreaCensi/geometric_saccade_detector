@@ -1,15 +1,16 @@
-import numpy, os
-
-import flydra.a2.core_analysis as core_analysis #@UnresolvedImport
-from flydra.a2 import xml_stimulus #@UnresolvedImport
-
-from . import logger
+from . import logger, np
 from .structures import rows_dtype
 from .utils import locate_roots
+from flydra.a2 import xml_stimulus  # @UnresolvedImport
+import flydra.a2.core_analysis as core_analysis  # @UnresolvedImport
+
+import os
 
 warned_fixed_dt = False
 
-def consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml"):
+
+def consider_stimulus(h5file, verbose_problems=False,
+                      fanout_name="fanout.xml"):
     """ 
         Parses the corresponding fanout XML and finds IDs to use as well 
         as the stimulus.
@@ -27,8 +28,7 @@ def consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml"):
             return False, None, None
 
         ca = core_analysis.get_global_CachingAnalyzer()
-        (obj_ids, use_obj_ids, #@UnusedVariable
-         is_mat_file, data_file, extra) = ca.initial_file_load(h5file) #@UnusedVariable
+        (_, use_obj_ids, _, _, _) = ca.initial_file_load(h5file) 
 
         file_timestamp = timestamp_string_from_filename(h5file)
 
@@ -40,10 +40,9 @@ def consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml"):
         if exclude_obj_ids is not None:
             use_obj_ids = list(set(use_obj_ids).difference(exclude_obj_ids))
 
-#        stim_xml = fanout.get_stimulus_for_timestamp(timestamp_string=file_timestamp)
-
-        episode = fanout._get_episode_for_timestamp(timestamp_string=file_timestamp) 
-        (single_episode, kh5_file, stim_fname) = episode #@UnusedVariable
+        episode = fanout._get_episode_for_timestamp(
+                                            timestamp_string=file_timestamp) 
+        (_, _, stim_fname) = episode 
         return True, use_obj_ids, stim_fname
 
     except xml_stimulus.WrongXMLTypeError:
@@ -52,10 +51,12 @@ def consider_stimulus(h5file, verbose_problems=False, fanout_name="fanout.xml"):
         return False, None, None
     except ValueError, ex:
         if verbose_problems:
-            logger.error("Caught ValueError for '%s': %s" % (file_timestamp, ex))
+            logger.error("Caught ValueError for '%s': %s" % 
+                         (file_timestamp, ex))
         return False, None, None 
     except Exception, ex:
-        logger.error('Not predicted exception while reading %s; %s' % (h5file, ex))
+        logger.error('Not predicted exception while reading %s; %s' % 
+                     (h5file, ex))
         return False, None, None
     
         
@@ -91,7 +92,6 @@ def get_good_files(where, pattern="*.kh5", fanout_template="fanout.xml",
         else:
             good_files.append((filename, use_obj_ids, stim_xml))
 
-
     if verbose:
         logger.info("Of these, %d have entries in fanout.xml" % 
                     (len(good_files),))
@@ -102,7 +102,7 @@ def get_good_files(where, pattern="*.kh5", fanout_template="fanout.xml",
 def timestamp_string_from_filename(filename):
     """Extracts timestamp string from filename"""
     ### TODO: check validity
-    data_file_path, data_file_base = os.path.split(filename) #@UnusedVariable
+    _, data_file_base = os.path.split(filename)
     return data_file_base[4:19]
 
 
@@ -115,7 +115,6 @@ def get_good_smoothed_tracks(filename, obj_ids,
             
     frames_per_second = 60.0
     dt = 1 / frames_per_second
-
 
     ca = core_analysis.get_global_CachingAnalyzer()  
         
@@ -153,18 +152,17 @@ def get_good_smoothed_tracks(filename, obj_ids,
                 if frows['obj_id'][i] == frows['obj_id'][i + 1]:
                     assert frows['timestamp'][i] < frows['timestamp'][i + 1]
                 
-
             # return raw data if smoothing is not requested
             if not use_smoothing:
                 yield (obj_id,
                        extract_interesting_fields(frows,
-                                                  numpy.dtype(rows_dtype)))
+                                                  np.dtype(rows_dtype)))
                 continue
 
             # otherwise, run the smoothing
             srows = ca.load_data(obj_id, data_file, use_kalman_smoothing=True,
                      frames_per_second=frames_per_second,
-                     dynamic_model_name=dynamic_model_name);
+                     dynamic_model_name=dynamic_model_name)
                      
             # make a copy, just in case
             srows = srows.copy()
@@ -172,9 +170,7 @@ def get_good_smoothed_tracks(filename, obj_ids,
             for i in range(len(srows)):
                 srows['timestamp'][i] = srows['frame'][i] * dt
             
-            
             # From Andrew:
-            
             # I'm pretty sure there is an inconsistency in some of this 
             # unit stuff. Basically, I used to do the camera calibrations 
             # all in mm (so that the 3D coords would come out in mm). Then,
@@ -182,20 +178,24 @@ def get_good_smoothed_tracks(filename, obj_ids,
             # the calibration and dynamic model stuff got defaulted to meters.
             # And basically there are inconsistencies in there.
             # Anyhow, I think the extent of the issue is that you'll be off 
-            # by 1000, so hopefully you can just determine that by looking at the data.
-
+            # by 1000, so hopefully you can just determine that by looking 
+            # at the data.
             # quick fix
             if dynamic_model_name == "mamarama, units: mm" and not warned:
                 warned = True
-                logger.info("Warning: Implementing simple workaround for flydra's " 
-                      "units inconsistencies (multiplying xvel,yvel by 1000).")
+                logger.info("Warning: Implementing simple workaround"
+                            " for flydra's " 
+                            "units inconsistencies "
+                            "(multiplying xvel,yvel by 1000).")
                 srows['xvel'] *= 1000
                 srows['yvel'] *= 1000
                 
-            yield obj_id, extract_interesting_fields(srows, numpy.dtype(rows_dtype))
+            yield obj_id, extract_interesting_fields(srows,
+                                                     np.dtype(rows_dtype))
             
         except core_analysis.NotEnoughDataToSmoothError:
-            #logger.warning('not enough data to smooth obj_id %d, skipping.'%(obj_id,))
+            #logger.warning('not enough data to 
+            # smooth obj_id %d, skipping.'%(obj_id,))
             continue 
         
     ca.close()
@@ -203,7 +203,7 @@ def get_good_smoothed_tracks(filename, obj_ids,
 
 def extract_interesting_fields(a, dtype):
     ''' Returns a copy of a with only the fields in dtype. '''
-    res = numpy.ndarray(shape=a.shape, dtype=dtype)
+    res = np.ndarray(shape=a.shape, dtype=dtype)
     for field in dtype.fields:
         res[field] = a[field]
     

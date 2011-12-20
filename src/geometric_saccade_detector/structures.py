@@ -19,23 +19,38 @@ saccade_dtype = [
     # Standard saccade representation
     ('time_start', 'float64'),
     ('time_stop', 'float64'),
-    ('orientation_start', 'float64'), # degrees
-    ('orientation_stop', 'float64'), # degrees
+    
+     # degrees
+    ('orientation_start', 'float64'),
+    
+    # degrees
+    ('orientation_stop', 'float64'),
+    
     ('time_passed', 'float64'),
     ('sign', 'int8'),
-    ('amplitude', 'float64'), # degrees 
+    
+    # degrees
+    ('amplitude', 'float64'),
+    
     ('duration', 'float64'),
-    ('top_velocity', 'float64'), # angular velocity, degrees/second
+    
+    # angular velocity, degrees/second
+    ('top_velocity', 'float64'),
     
     # other fields used for managing different samples, used in the analysis
     ('species', 'S32'),
     ('stimulus', 'S32'),
-    ('sample', 'S64'), # format: 'YYYYMMDD_HHmmSS'
-    ('sample_num', 'int'), # unique index for the sample
-                           # This is filled in later
-
+    
+    # format: 'YYYYMMDD_HHmmSS'
+    ('sample', 'S64'),
+    
+    # unique index for the sample
+    # This is filled in later
+    ('sample_num', 'int'),
+                           
     # other debug fields, not used in the analysis
-    ('processed', 'S128'), # timestamp and processing host
+    # timestamp and processing host
+    ('processed', 'S128')
     
     # Specific to mamarama data
     ('time_middle', 'float64'),
@@ -43,7 +58,9 @@ saccade_dtype = [
     ('obj_id', 'int'),
     ('position', ('float64', 3)),
     ('linear_velocity_world', ('float64', 3)),
-    ('linear_velocity_modulus', 'float64'), # m/s
+    
+    # m/s
+    ('linear_velocity_modulus', 'float64'),
     ('linear_acceleration_modulus', 'float64'),
     ('smooth_displacement', 'float64'),
 
@@ -56,7 +73,8 @@ saccade_dtype = [
 # intermediate computations.
 # Note that all this data is expressed in *radians*, not degrees.
 annotation_dtype = [
-    ('orientation_start', 'float64'), # XXX repeated?
+                    # XXX repeated?
+    ('orientation_start', 'float64'),
     ('orientation_stop', 'float64'),
     ('before_dispersion', 'float64'),
     ('after_dispersion', 'float64'),

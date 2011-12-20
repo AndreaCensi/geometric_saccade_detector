@@ -1,4 +1,5 @@
-import numpy as np
+from . import np 
+
 
 def check_saccade_is_well_formed(saccade):
     
@@ -15,24 +16,23 @@ def check_saccade_is_well_formed(saccade):
     ]
     
     try: 
-            
         for x in check_not_nan:
             if not np.isfinite(saccade[x]):
-                raise Exception('Not finite values in %r (%s)' % (x, saccade[x]))
+                raise Exception('Not finite values in %r (%s)' % 
+                                (x, saccade[x]))
         
         if saccade['time_stop'] <= saccade['time_start']:
             raise Exception('Incoherent values of time_start, time_stop')
             
-        
-        #assert_allclose(saccade['amplitude'],  np.abs(saccade['orientation_start']-
-        #                                              saccade['orientation_stop']) 
+        #assert_allclose(saccade['amplitude'],  
+        # np.abs(saccade['orientation_start']-
+        #        saccade['orientation_stop']) 
         if not (saccade['sign'] == -1 or saccade['sign'] == 1):
             raise Exception('Strange value for sign: %r' % saccade['sign'])
         
-        
-        
         if not np.isfinite(saccade['position']).all():
             raise Exception('Invalid position')
+    
     except Exception as e:
         msg = str(e)
         msg += '\n\tDType: %s\n\tvalues: %s' % (saccade.dtype, str(saccade))

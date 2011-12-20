@@ -1,4 +1,3 @@
-
 from . import np
 from reprep import Report
 from reprep.plot_utils.axes import y_axis_set, x_axis_set
@@ -6,8 +5,8 @@ from geometric_saccade_detector.structures import saccade_dtype, UNKNOWN
 from geometric_saccade_detector.algorithm import saccade_list_to_array
 import warnings
 
+
 def angvel_saccade_detect(rows,
-                          
                           angular_velocity_threshold_deg=300,
                           min_dt=1 / 60.0,
                           max_dt=1):
@@ -16,11 +15,9 @@ def angvel_saccade_detect(rows,
         
         
     '''
-    
     # Find points where the angular velocity is higher than a 
     # threhsold
     angular_velocity_deg = np.rad2deg(rows['reduced_angular_velocity'])
-    timestamp = rows['timestamp']
     orientation_deg = np.degrees(rows['reduced_angular_orientation'])
     obj_id = rows['obj_id']
     
@@ -38,8 +35,8 @@ def angvel_saccade_detect(rows,
             regular[i] = True
         max_so_far = max(max_so_far, timestamp[i])
         
-
-    fast_enough = np.abs(angular_velocity_deg) >= angular_velocity_threshold_deg
+    fast_enough = (np.abs(angular_velocity_deg) 
+                   >= angular_velocity_threshold_deg)
     candidates = np.logical_and(fast_enough, regular)
     
     saccades = []
@@ -49,7 +46,6 @@ def angvel_saccade_detect(rows,
         # Do not consider joining multiple tracks
         if obj_id[start] != obj_id[stop - 1]:
             continue
-        
         
         stop -= 1
         time_start = timestamp[start]
@@ -62,8 +58,8 @@ def angvel_saccade_detect(rows,
         # Find the fastest point in the saccade   
         #print((stop + 1) - start)
         avel = np.abs(angular_velocity_deg)
-        avel[:start] = 0 # zero other
-        avel [stop:] = 0
+        avel[:start] = 0  # zero other
+        avel[stop:] = 0
         middle = np.argmax(avel)
         top_velocity_deg = angular_velocity_deg[middle]
         
@@ -103,11 +99,10 @@ def angvel_saccade_detect(rows,
         saccade['species'] = UNKNOWN
         saccade['stimulus'] = UNKNOWN
         saccade['sample'] = UNKNOWN
-        saccade['sample_num'] = -1 # will be filled in by someone else
+        saccade['sample_num'] = -1  # will be filled in by someone else
         saccade['processed'] = UNKNOWN 
         
         saccades.append(saccade)
-
    
     saccades = saccade_list_to_array(saccades)
     
@@ -128,19 +123,18 @@ def plot_angvel_saccade_detect_results(rows):
     orientation_deg = np.degrees(rows['reduced_angular_orientation'])
 
     T = timestamp 
-#     timestamp - timestamp[0]
     
     f = r.figure(cols=2)
     threshold = data['angular_velocity_threshold_deg']
     with f.plot('angular_velocity_deg') as pylab:
-        pylab.plot([T[0], T[-1]], [0, 0 ], 'k--')
+        pylab.plot([T[0], T[-1]], [0, 0], 'k--')
         pylab.plot(T, data['angular_velocity_deg'], '-')
         y_axis_set(pylab, -1500, 1500)
         x_axis_set(pylab, T[0], T[-1])
         pylab.ylabel('angular velocity')
 
     with f.plot('fast_enough') as pylab:
-        pylab.plot([T[0], T[-1]], [0, 0 ], 'k--')
+        pylab.plot([T[0], T[-1]], [0, 0], 'k--')
         pylab.plot(T, data['angular_velocity_deg'], 'k-')
         pylab.plot([T[0], T[-1]], [threshold, threshold], 'b--')
         pylab.plot([T[0], T[-1]], [-threshold, -threshold], 'b--')
@@ -149,7 +143,6 @@ def plot_angvel_saccade_detect_results(rows):
         pylab.plot(T[i], data['angular_velocity_deg'][i], 'b.')
         y_axis_set(pylab, -threshold * 3, threshold * 3)
         x_axis_set(pylab, T[0], T[-1])
-        
         
         pylab.ylabel('angular velocity (deg/s)')
         
@@ -165,11 +158,10 @@ def plot_angvel_saccade_detect_results(rows):
             plot_vert(pylab, saccade['time_stop'], 'b')
     
     with f.plot('detections') as pylab:
-        pylab.plot([T[0], T[-1]], [0, 0 ], 'k--')
+        pylab.plot([T[0], T[-1]], [0, 0], 'k--')
         pylab.plot(T, data['angular_velocity_deg'], 'k-')
         pylab.plot([T[0], T[-1]], [threshold, threshold], 'b--')
         pylab.plot([T[0], T[-1]], [-threshold, -threshold], 'b--')
-        
         
         y_axis_set(pylab, -threshold * 3, threshold * 3)
         x_axis_set(pylab, T[0], T[-1])
@@ -184,26 +176,20 @@ def plot_angvel_saccade_detect_results(rows):
 #        x_axis_set(pylab, T[0], T[-1])
 #        plot_saccades(pylab, saccades)
         
-        
         for saccade in saccades:
             a = saccade['orientation_start']
             b = saccade['orientation_stop']
             t0 = saccade['time_start']
             t1 = saccade['time_stop']
             pylab.plot([t0, t1], [a, b], 'b-', linewidth=5)
-            
-    
+             
         pylab.ylabel('orientation (deg)')
-        
-    
         
     return r
     
 
-
 def find_sequences(x):
     ''' Finds all True subsequences in x. '''
-    
     i = 0
     n = len(x)
     while i < n:

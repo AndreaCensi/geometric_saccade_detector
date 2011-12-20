@@ -1,9 +1,9 @@
-import numpy, scipy.signal
-from contracts import contract
+import scipy.signal
+from . import np, contract
 
 
 def merge_fields(a, b, ignore_duplicates=False):
-    ''' Merge the fields of the two numpy arrays a,b. 
+    ''' Merge the fields of the two np arrays a,b. 
         They must have the same shape. '''
     if a.shape != b.shape:    
         raise ValueError('Arrays must have the same shape; '
@@ -14,7 +14,6 @@ def merge_fields(a, b, ignore_duplicates=False):
     for f in a.dtype.fields:
         all_fields[f] = a.dtype[f]
         new_dtype.append((f, a.dtype[f]))
-    
     
     for f in b.dtype.fields:
         if f in all_fields:
@@ -27,9 +26,9 @@ def merge_fields(a, b, ignore_duplicates=False):
         else:
             new_dtype.append((f, b.dtype[f]))
         
-    new_dtype = numpy.dtype(new_dtype)
+    new_dtype = np.dtype(new_dtype)
 
-    c = numpy.ndarray(shape=a.shape, dtype=new_dtype)
+    c = np.ndarray(shape=a.shape, dtype=new_dtype)
     for f in b.dtype.fields:
         # c[f] = b[f][:]
         c[f] = b[:][f]
@@ -44,41 +43,48 @@ def find_closest_index(t, value):
     indices = find_indices_in_bounds(t, value, t[-1])
     return indices[0] 
 
+
 def find_indices_in_bounds(t, lower_bound, upper_bound):
-    ''' Return the indices i such that t[i] >= lower_bound and t[o] <= upper_bound. '''
-    indices, = numpy.nonzero(numpy.logical_and(t >= lower_bound, t <= upper_bound))
+    ''' 
+        Return the indices i such that t[i] >= lower_bound 
+        and t[o] <= upper_bound. 
+    '''
+    indices, = np.nonzero(np.logical_and(t >= lower_bound,
+                                               t <= upper_bound))
     
     # make sure it is sorted
     if len(indices) > 0:
         assert indices[0] <= indices[-1] 
     return indices        
 
+
 def get_orientation_and_dispersion(rows, center, indices):
-    ''' Rows: numpy array with 'x','y' fields.
+    ''' Rows: np array with 'x','y' fields.
         center: index of point to be considered the reference.
         indices: indices of points.
         
         Returns (orientation, dispersion) in radians.
     '''
     # central point
-    p0 = numpy.array([rows['x'][center], rows['y'][center]])
+    p0 = np.array([rows['x'][center], rows['y'][center]])
     
     N = len(indices)
     # compute the angle of each point with respect to the center
-    theta = numpy.ndarray((N,))
+    theta = np.ndarray((N,))
     for i in range(len(indices)):
         j = indices[i]
-        p = numpy.array([rows['x'][j], rows['y'][j]])
+        p = np.array([rows['x'][j], rows['y'][j]])
         diff = p - p0
-        theta[i] = numpy.arctan2(diff[1], diff[0])
+        theta[i] = np.arctan2(diff[1], diff[0])
     
     # compute statistics of this angle distribution
     mean, std = angle_mean_and_std(theta)
 
-    assert not numpy.isnan(mean)
-    assert not numpy.isnan(std)
+    assert not np.isnan(mean)
+    assert not np.isnan(std)
     
     return mean, std
+        
         
 def angle_mean_and_std(theta):
     ''' Computes mean and standard deviation for a distribution
@@ -88,38 +94,45 @@ def angle_mean_and_std(theta):
     '''
     assert len(theta) >= 2
     
-    C = numpy.cos(theta)
-    S = numpy.sin(theta)
+    C = np.cos(theta)
+    S = np.sin(theta)
     
-    mean = numpy.arctan2(S.mean(), C.mean())
+    mean = np.arctan2(S.mean(), C.mean())
     
-    error = numpy.array(map(normalize_pi, theta - mean))
+    error = np.array(map(normalize_pi, theta - mean))
     std = error.std()
     
     return mean, std
 
+
 def normalize_pi(a):
     ''' Normalizes an angle in [-pi, pi] '''
-    return numpy.arctan2(numpy.sin(a), numpy.cos(a))
+    return np.arctan2(np.sin(a), np.cos(a))
+    
     
 def normalize_180(d):
-    ''' Normalizes an angle, expressed in degrees, in the [-180,180] interval. '''
-    return numpy.degrees(normalize_pi(numpy.radians(d)))
+    ''' 
+        Normalizes an angle, expressed in degrees, in the [-180,180] 
+        interval. 
+    '''
+    return np.degrees(normalize_pi(np.radians(d)))
     
 
 @contract(x='array[K]', timestamp='array[K]', returns='array[K]')
 def compute_derivative(x, timestamp):
     dt = timestamp[1] - timestamp[0]
-    deriv_filter = numpy.array([0.5, 0, -0.5] / dt)
+    deriv_filter = np.array([0.5, 0, -0.5] / dt)
     if scipy.version.short_version == '0.8.0':
-        d = scipy.signal.convolve(x, deriv_filter, mode='same', old_behavior=True)
+        d = scipy.signal.convolve(x, deriv_filter, mode='same',
+                                  old_behavior=True)
     else:
         d = scipy.signal.convolve(x, deriv_filter, mode=1)
     d[0] = d[1]
     d[-1] = d[-2]
     return d        
 
-# Taken from the numpy cookbook
+# Taken from the np cookbook
+
 
 def smooth1d(x, window_len=11, window='hanning'):
     """smooth the data using a window with requested size.
@@ -131,8 +144,10 @@ def smooth1d(x, window_len=11, window='hanning'):
     
     input:
         x: the input signal 
-        window_len: the dimension of the smoothing window; should be an odd integer
-        window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
+        window_len: the dimension of the smoothing window; should be an odd 
+            integer
+        window: the type of window from 'flat', 'hanning', 'hamming', 
+            'bartlett', 'blackman'
             flat window will produce a moving average smoothing.
 
     output:
@@ -146,36 +161,35 @@ def smooth1d(x, window_len=11, window='hanning'):
     
     see also: 
     
-    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+    np.hanning, np.hamming, np.bartlett, np.blackman, np.convolve
     scipy.signal.lfilter
  
-    TODO: the window parameter could be the window itself if an array instead of a string   
+    TODO: the window parameter could be the window itself if an array 
+    instead of a string   
     """
 
     if x.ndim != 1:
-        raise ValueError, "smooth only accepts 1 dimension arrays."
+        raise ValueError("smooth only accepts 1 dimension arrays.")
 
     if x.size < window_len:
-        raise ValueError, "Input vector needs to be bigger than window size."
-
+        raise ValueError("Input vector needs to be bigger than window size.")
 
     if window_len < 3:
         return x
 
-
     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError, ("Window is not one of 'flat', 'hanning', 'hamming',"
+        raise ValueError("Window is not one of 'flat', 'hanning', 'hamming',"
                             "'bartlett', 'blackman'")
 
-
-    s = numpy.r_[2 * x[0] - x[window_len:1:-1], x, 2 * x[-1] - x[-1:-window_len:-1]]
+    s = np.r_[2 * x[0] - 
+              x[window_len:1:-1], x, 2 * x[-1] - x[-1:-window_len:-1]]
     #print(len(s))
-    if window == 'flat': #moving average
-        w = numpy.ones(window_len, 'd')
+    if window == 'flat':  # moving average
+        w = np.ones(window_len, 'd')
     else:
-        w = eval('numpy.' + window + '(window_len)')
+        w = eval('np.' + window + '(window_len)')
 
-    y = numpy.convolve(w / w.sum(), s, mode='same')
+    y = np.convolve(w / w.sum(), s, mode='same')
     return y[window_len - 1:-window_len + 1]
 
 
