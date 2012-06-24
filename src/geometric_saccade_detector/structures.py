@@ -50,7 +50,7 @@ saccade_dtype = [
                            
     # other debug fields, not used in the analysis
     # timestamp and processing host
-    ('processed', 'S128')
+    ('processed', 'S128'),
     
     # Specific to mamarama data
     ('time_middle', 'float64'),
